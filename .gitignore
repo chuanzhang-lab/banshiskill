@@ -1,0 +1,6 @@
+# Ignore Python cache files in this local helper folder
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
