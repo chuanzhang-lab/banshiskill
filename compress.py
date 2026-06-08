@@ -8,13 +8,15 @@ import argparse
 import fnmatch
 import logging
 import os
+import re
 import subprocess
 import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 DEFAULT_WORKSPACE_DIR = Path("/Users/newmacbook/claude")
-DEFAULT_OUT_DIR = Path("/Users/newmacbook/Desktop/办事材料")
+DEFAULT_OUT_DIR = Path("/Users/newmacbook/Desktop/banshi2")
+DEFAULT_SKILL_MD = Path("~/Desktop/banshi2/SKILL.md")
 DEFAULT_TIMEOUT = 30
 DEFAULT_EXCLUDE = ["__pycache__", "*.pyc", "*.swp", ".DS_Store"]
 
@@ -25,7 +27,9 @@ def configure_logging() -> None:
 
 def run_cmd(cmd: List[str], cwd: Path = None, timeout: int = DEFAULT_TIMEOUT) -> str:
     try:
-        result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(
+            cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout
+        )
         if result.returncode != 0:
             logging.warning("Command failed: %s", " ".join(cmd))
             if result.stderr:
@@ -48,7 +52,7 @@ def run_cmd(cmd: List[str], cwd: Path = None, timeout: int = DEFAULT_TIMEOUT) ->
 
 
 def is_noise_path(path: str, exclude_patterns: List[str]) -> bool:
-    normalized = path.replace('\\', '/')
+    normalized = path.replace("\\", "/")
     for pattern in exclude_patterns:
         if fnmatch.fnmatch(normalized, pattern) or pattern in normalized:
             return True
@@ -91,9 +95,98 @@ def get_latest_commit(workspace_dir: Path) -> str:
     return commit or "N/A"
 
 
-def build_snapshot(timestamp: str, workspace_dir: Path, out_dir: Path, git_snapshot: str, last_commit: str) -> str:
+def calc_skeleton_preservation(skill_path: str) -> float:
+    p = Path(skill_path).expanduser()
+    if not p.exists():
+        return 0.0
+    text = p.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    total = len(lines)
+    if total == 0:
+        return 0.0
+    heading_count = sum(1 for line in lines if re.match(r"^#{1,6}\s", line))
+    step_count = sum(1 for line in lines if re.match(r"^\s*\d+\.\s", line))
+    return (heading_count + step_count) / total
+
+
+def verify_flow_executability(skill_path: str) -> bool:
+    p = Path(skill_path).expanduser()
+    if not p.exists():
+        return False
+    text = p.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    chapter_lines = []
+    current_chapter = []
+    for line in lines:
+        if re.match(r"^#{1,3}\s", line):
+            if current_chapter:
+                chapter_lines.append(current_chapter)
+            current_chapter = []
+        current_chapter.append(line)
+    if current_chapter:
+        chapter_lines.append(current_chapter)
+    for chapter in chapter_lines:
+        step_nums = []
+        for line in chapter:
+            m = re.match(r"^\s*(\d+)\.\s", line)
+            if m:
+                step_nums.append(int(m.group(1)))
+        if len(step_nums) >= 2:
+            expected = list(range(1, len(step_nums) + 1))
+            if step_nums == expected:
+                return True
+    return False
+
+
+def calc_compression_ratio(original_path: str, compressed_path: str) -> float:
+    op = Path(original_path).expanduser()
+    cp = Path(compressed_path).expanduser()
+    if not op.exists():
+        return 1.0
+    original_chars = len(op.read_text(encoding="utf-8"))
+    if not cp.exists():
+        return 1.0
+    compressed_chars = len(cp.read_text(encoding="utf-8"))
+    if original_chars == 0:
+        return 1.0
+    return compressed_chars / original_chars
+
+
+def calc_skill_compression_ratio(skill_md_path: str) -> float:
+    """计算决策保留率（替代误导性的"信息压缩率"）
+
+    返回：XML 中决策点 / 原始决策点
+    """
+    skill_path = Path(skill_md_path).expanduser()
+    xml_path = Path.home() / "Desktop/banshi2/skill_compressed.xml"
+    if not skill_path.exists():
+        return 1.0
+    original_text = skill_path.read_text(encoding="utf-8")
+    original_decisions = (
+        original_text.count("\n1.")
+        + original_text.count("\n2.")
+        + original_text.count("\n- ")
+    )
+    if original_decisions == 0:
+        return 1.0
+    if not xml_path.exists():
+        return 1.0
+    xml_text = xml_path.read_text(encoding="utf-8")
+    decision_points = xml_text.count("<step_") + xml_text.count("<rule ")
+    rate = decision_points / original_decisions
+    return round(min(rate, 1.0), 4)
+
+
+def build_snapshot(
+    timestamp: str,
+    workspace_dir: Path,
+    out_dir: Path,
+    git_snapshot: str,
+    last_commit: str,
+    fidelity_section: Optional[str] = None,
+) -> str:
     host_system = os.uname().sysname if hasattr(os, "uname") else "unknown"
-    return f"""# SESSION CONTEXT COMPACTED (会话状态自动压缩层)
+    base = f"""# SESSION CONTEXT COMPACTED (会话状态自动压缩层)
 > **Generated on:** {timestamp} | **Host System:** {host_system}
 
 ## 1. 活动意图与最新变更记录
@@ -108,10 +201,14 @@ def build_snapshot(timestamp: str, workspace_dir: Path, out_dir: Path, git_snaps
 ## 3. 全局运行时状态
 - **Active Workspace:** `{workspace_dir}`
 - **输出目录:** `{out_dir}`
+"""
+    if fidelity_section:
+        base += f"\n{fidelity_section}\n"
 
----
+    base += """---
 *Tip: 该文件用于在新会话中快速恢复开发状态。不要把它当作常规日志聚合器。*
 """
+    return base
 
 
 def write_snapshot(out_file: Path, content: str) -> bool:
@@ -158,7 +255,15 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_EXCLUDE,
         help="Glob patterns to exclude from git status output.",
     )
-    parser.add_argument("--version", action="version", version="context-compressor 1.0.0")
+    parser.add_argument(
+        "--skill-md",
+        type=Path,
+        default=DEFAULT_SKILL_MD,
+        help="Path to SKILL.md for fidelity evaluation.",
+    )
+    parser.add_argument(
+        "--version", action="version", version="context-compressor 1.0.0"
+    )
     return parser.parse_args()
 
 
@@ -167,8 +272,14 @@ def main() -> int:
     args = parse_args()
 
     workspace_dir = args.workspace_dir.expanduser()
-    out_dir = args.out_dir.expanduser() if args.out_file is None else args.out_file.parent.expanduser()
-    out_file = args.out_file.expanduser() if args.out_file else out_dir / "CONTEXT_SNAPSHOT.md"
+    out_dir = (
+        args.out_dir.expanduser()
+        if args.out_file is None
+        else args.out_file.parent.expanduser()
+    )
+    out_file = (
+        args.out_file.expanduser() if args.out_file else out_dir / "CONTEXT_SNAPSHOT.md"
+    )
 
     logging.info("Starting Context Compressor")
     logging.info("Workspace dir: %s", workspace_dir)
@@ -179,7 +290,27 @@ def main() -> int:
     git_snapshot = get_git_changes(workspace_dir, args.exclude)
     last_commit = get_latest_commit(workspace_dir)
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    snapshot = build_snapshot(timestamp, workspace_dir, out_dir, git_snapshot, last_commit)
+
+    fidelity_section = None
+    skill_md = args.skill_md.expanduser()
+    if skill_md.exists():
+        skeleton = calc_skeleton_preservation(str(skill_md))
+        executable = verify_flow_executability(str(skill_md))
+        ratio = calc_skill_compression_ratio(str(skill_md))
+        fidelity_section = f"""## 4. 保真度评估
+- **骨架保留率:** {skeleton:.2f}
+- **流程可执行性:** {executable}
+- **决策保留率:** {ratio:.2f}（关键决策点保留比例）"""
+        logging.info(
+            "Fidelity evaluation: skeleton=%.2f, executable=%s, decision_preservation=%.2f",
+            skeleton,
+            executable,
+            ratio,
+        )
+
+    snapshot = build_snapshot(
+        timestamp, workspace_dir, out_dir, git_snapshot, last_commit, fidelity_section
+    )
 
     return 0 if write_snapshot(out_file, snapshot) else 1
 

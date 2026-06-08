@@ -1,0 +1,105 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v2.1.0)'
+        required: true
+        default: 'v2.0.0'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: Run tests
+        run: python -m pytest test_compress.py -v
+
+      - name: Generate artifacts
+        run: |
+          python3 parse_skill.py
+          python3 skill_compressor.py
+
+      - name: Package release
+        run: |
+          mkdir -p release
+          cp skill_tree.json release/
+          cp skill_compressed.xml release/
+          cp SKILL.md release/
+          cp parse_skill.py release/
+          cp skill_compressor.py release/
+          cp compress.py release/
+          cp test_compress.py release/
+          cp Makefile release/
+          cp README.md release/ 2>/dev/null || true
+
+      - name: Create release bundle
+        run: |
+          cd release
+          tar -czf ../skill-compressor-${{ github.ref_name }}.tar.gz *
+          cd ..
+          ls -la *.tar.gz
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            release/
+            skill-compressor-${{ github.ref_name }}.tar.gz
+
+  publish:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: .
+
+      - name: Extract version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Skill Compressor ${{ steps.get_version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            skill-compressor-${{ steps.get_version.outputs.VERSION }}.tar.gz
+            release/skill_tree.json
+            release/skill_compressed.xml
+            release/SKILL.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

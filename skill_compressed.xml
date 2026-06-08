@@ -1,0 +1,85 @@
+<skill name="context-compressor" type="operation">
+  <context_hierarchy>
+    <system_level priority="critical">
+      <rule>元指令优先级 &gt; 历史信息</rule>
+      <rule>禁止跳过 ReadFile 步骤</rule>
+      <rule>回复不超过 50 字</rule>
+    </system_level>
+    <skill_level priority="high">
+      <rule>执行结果必须写入 output.md</rule>
+      <rule>必须先 ReadFile 获取执行依据</rule>
+    </skill_level>
+    <user_level priority="low">
+      <content>用户当前输入（参考用）</content>
+    </user_level>
+  </context_hierarchy>
+
+  <constraints>
+    <rule priority="high" target="N2" type="required" text="description: &quot;ALWAYS USE WHEN: 任何时候当智能体检测到会话卡顿、Token 数量过高、用户提到 '会话太长了'、'重新整理记忆'、'上下文满了'、'开始崩溃'，或者智能体自身检测到多轮迭代中出现记忆混乱、重复犯同类错误时，必须调用本技能生成紧凑的上下文压缩树。&quot;" />
+    <rule priority="high" target="N10" type="required" text="| **skill_level** | high | Skill 级规则，执行依据 | 必须先 ReadFile |" />
+    <rule priority="critical" target="N35" type="required" text="&gt; - **约束规则：** 必须保留意图与变更记录；禁止保留过程性噪音" />
+    <rule priority="critical" target="N52" type="forbidden" text="&gt; - **约束规则：** 只过滤明确指定的噪音；禁止修改原始文件" />
+    <rule priority="critical" target="N58" type="forbidden" text="**禁止**将所有内容都压缩成摘要。只提取：" />
+    <rule priority="critical" target="N58" type="forbidden" text="当前任务意图（不要过程）" />
+    <rule priority="critical" target="N58" type="forbidden" text="关键变更（不要逐行 diff）" />
+    <rule priority="critical" target="N58" type="forbidden" text="最新状态（不要历史记录）" />
+    <rule priority="high" target="N63" type="required" text="**必须**让新智能体拿到快照后能：" />
+    <rule priority="critical" target="N68" type="forbidden" text="只过滤**噪音文件**（缓存、临时文件、系统文件）。**不要**删除或忽略：" />
+    <rule priority="critical" target="N73" type="forbidden" text="&gt; - **约束规则：** 评估通过才执行；禁止在评估不通过时强制执行" />
+    <rule priority="critical" target="N92" type="forbidden" text="&gt; - **约束规则：** 向前兼容；禁止在未验证的情况下覆盖" />
+    <rule priority="high" target="N118" type="required" text="**必须**先发送元指令再输出核心结论，因为元指令确立了任务优先级" />
+    <rule priority="critical" target="N118" type="forbidden" text="**禁止**在核心结论中包含过程性对话（对话历史、调试尝试、发散讨论）" />
+    <rule priority="critical" target="N118" type="forbidden" text="**只能**将压缩结果写入 `~/proactive-memory/SESSION-STATE.md`，严禁写入其他路径" />
+    <rule priority="high" target="N118" type="required" text="**务必**保持回复简短，因为压缩本身是一次轻量化状态记录，不是长篇报告" />
+    <rule priority="high" target="N136" type="required" text="**必须**先 ReadFile 读取 `~/Desktop/banshi2/SKILL.md` 再执行任务，因为文件内容是执行依据" />
+    <rule priority="critical" target="N136" type="forbidden" text="**禁止**直接注入文件内容到对话中而不经过 ReadFile 流程" />
+    <rule priority="critical" target="N136" type="forbidden" text="**只能**将执行结果写入 `~/Desktop/banshi2/output.md`，严禁写入其他路径" />
+    <rule priority="high" target="N136" type="required" text="**务必**保持回复不超过 50 字，从而避免回复本身消耗过多上下文" />
+    <rule priority="critical" target="N136" type="forbidden" text="**严禁**跳过元指令发送步骤，因为元指令确立了任务优先级" />
+    <rule priority="high" target="N142" type="required" text="如果感觉上下文明显变慢，**务必**立即说&quot;压缩当前会话&quot;" />
+  </constraints>
+
+  <execution_flow mode="sequential">
+    <step_1 checkpoint="[1]" id="N47" action="意图与最新变更记录" />
+    <step_2 checkpoint="[2]" id="N48" action="过滤规则与噪音说明" />
+    <step_3 checkpoint="[3]" id="N49" action="全局运行时状态" />
+    <step_4 checkpoint="[4]" id="N114">
+        <intent>重置上下文优先级</intent>
+        <action>发送元指令（见统一元指令，任务部分填入"压缩当前会话"），从而重置上下文优先级，使历史对话降级为背景噪音</action>
+        <effect>重置上下文优先级</effect>
+        <precondition>前会话"</precondition>
+    </step_4>
+    <step_5 checkpoint="[5]" id="N115">
+        <intent>仅保留决策骨干与关键状态</intent>
+        <action>输出 5-10 条核心结论（每条不超过 20 字，总共不超过 200 字），丢弃过程性对话、情绪性内容、发散讨论，因而仅保留决策骨干与关键状态</action>
+        <effect>仅保留决策骨干与关键状态</effect>
+    </step_5>
+    <step_6 checkpoint="[6]" id="N116">
+        <intent>基线文件更新</intent>
+        <action>写入 `~/proactive-memory/SESSION-STATE.md`，导致基线文件更新，新会话可从该文件恢复上下文</action>
+        <effect>基线文件更新</effect>
+        <output>~/proactive-memory/SESSION-STATE.md</output>
+    </step_6>
+    <step_7 checkpoint="[7]" id="N117" action="确认完成：说&quot;元指令已发送，基线已更新。基于此继续。&quot;" />
+    <step_8 checkpoint="[8]" id="N132">
+        <intent>确立当前任务的最高优先级</intent>
+        <action>发送元指令（见统一元指令，任务部分填入具体指令），从而确立当前任务的最高优先级，使历史信息降级</action>
+        <effect>确立当前任务的最高优先级</effect>
+        <precondition>前任务的最高优先级</precondition>
+    </step_8>
+    <step_9 checkpoint="[9]" id="N133">
+        <intent>获取执行依据与约束规则</intent>
+        <action>ReadFile 读取 `~/Desktop/banshi2/SKILL.md`，因而获取执行依据与约束规则，确保后续操作符合技能定义</action>
+        <effect>获取执行依据与约束规则</effect>
+        <input>~/Desktop/banshi2/SKILL.md</input>
+        <precondition>后续操作符合技能定义</precondition>
+    </step_9>
+    <step_10 checkpoint="[10]" id="N134">
+        <intent>执行产出持久化</intent>
+        <action>执行任务并将结果写入 `~/Desktop/banshi2/output.md`，导致执行产出持久化，用户可离线查阅</action>
+        <effect>执行产出持久化</effect>
+        <output>~/Desktop/banshi2/output.md</output>
+    </step_10>
+    <step_11 checkpoint="[11]" id="N135" action="回复简短确认：" />
+  </execution_flow>
+</skill>

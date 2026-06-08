@@ -1,6 +1,50 @@
-# Ignore Python cache files in this local helper folder
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.egg-info/
+
+# IDE
 .DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+build/
+dist/
+release/
+*.tar.gz
+*.zip
+
+# Backup files
+*.bak
+*.bak.*
+*~
+.~*
+
+# Generated files (uncomment if you don't want them tracked)
+# skill_tree.json
+# skill_compressed.xml
+# chapter_hashes.json
+# CONTEXT_SNAPSHOT.md
+
+# Test output
+.pytest_cache/
+.pytest_cache/
+
+# Local secrets
+.env
+.env.local
+secrets.json
+
+# OS
+Thumbs.db

@@ -1,0 +1,2834 @@
+{
+  "meta": {
+    "source": "/Users/newmacbook/Desktop/banshi2/SKILL.md",
+    "version": "2.0.0",
+    "generated": "2026-06-06T16:59:48",
+    "parser": "rule-based-4step-pipeline",
+    "scheme": "Skill强关联降维最小可行方案"
+  },
+  "scheme_verdict": {
+    "rejected": {
+      "剔除80%内容": "误伤率过高，改为分层保留+结构化输出",
+      "关键词全局四四关联O(n²)": "输入输出双爆token，不可行",
+      "自我打分(0-10分)": "主观性太强，无重现性",
+      "仅保留因果关系(单独)": "丢三顺序=操作手册报废",
+      "仅保留约束关系(单独)": "丢三层级和顺序=规则碎片化",
+      "开新会话隔离": "用户明确否决，且破坏连续性"
+    },
+    "adopted": {
+      "文件外化存储": "系统架构，解决上下文膨胀的根本手段",
+      "主动前置压缩": "辅助手段，用于延缓自动压缩触发",
+      "层级归属+因果+顺序": "核心框架，骨架+命脉+逻辑桥接齐全",
+      "约束关系": "可选补充，提高保真度但非必需",
+      "功能角色分类": "预处理手段，替代主观打分",
+      "结构层全自动提取": "核心方案，基于文档格式而非语义"
+    }
+  },
+  "tree": {
+    "id": "root",
+    "type": "root",
+    "label": "",
+    "children": [
+      {
+        "id": "N1",
+        "type": "info",
+        "label": "name: context-compressor",
+        "children": []
+      },
+      {
+        "id": "N2",
+        "type": "constraint",
+        "label": "description: \"ALWAYS USE WHEN: 任何时候当智能体检测到会话卡顿、Token 数量过高、用户提到 '会话太长了'、'重新整理记忆'、'上下文满了'、'开始崩溃'，或者智能体自身检测到多轮迭代中出现记忆混乱、重复犯同类错误时，必须调用本技能生成紧凑的上下文压缩树。\"",
+        "children": []
+      },
+      {
+        "id": "N3",
+        "type": "info",
+        "label": "user-invocable: true",
+        "children": []
+      },
+      {
+        "id": "N4",
+        "type": "info",
+        "label": "version: 1.0.0",
+        "children": []
+      },
+      {
+        "id": "N5",
+        "type": "info",
+        "label": "# 上下文压缩与状态精简技能 (Context Compressor Skill)",
+        "children": []
+      },
+      {
+        "id": "N6",
+        "type": "conditional",
+        "label": "当我们在深度开发或 AI 代理调试过程中，因对话历史累计、代码仓库变更或终端输出导致上下文窗口被耗尽时，直接丢弃上下文会让智能体遗忘关键决策、遗漏已验证的错误修复，以及重复出现已排除的问题。",
+        "children": [],
+        "has_internal_causality": true,
+        "causal_object": "上下文窗口被耗尽时"
+      },
+      {
+        "id": "N7",
+        "type": "info",
+        "label": "本技能通过**结构化压缩 (Structured Compaction)**，将工作状态转化为一份\"只保留骨干、去除噪音\"的可复用状态快照。",
+        "children": []
+      },
+      {
+        "id": "N8",
+        "type": "info",
+        "label": "> **四要素设计说明：** 本技能每个操作流程均遵循\"触发条件（层级归属）→ 执行步骤（顺序关系+因果关系）→ 约束规则（约束关系）→ 输出结果\"的四要素结构，确保流程可追溯、因果可验证、约束可执行。",
+        "children": []
+      },
+      {
+        "id": "N9",
+        "type": "heading",
+        "label": "0. 层级优先级说明（Agent 设计核心）",
+        "children": [
+          {
+            "id": "N10",
+            "type": "heading",
+            "label": "设计原则",
+            "children": [
+              {
+                "id": "N11",
+                "type": "info",
+                "label": "本 Skill 采用**\"层级隔离 + 顺序驱动\"**的双轨设计：",
+                "children": []
+              },
+              {
+                "id": "N12",
+                "type": "info",
+                "label": "| 层级 | 优先级 | 说明 | 示例 |",
+                "children": []
+              },
+              {
+                "id": "N13",
+                "type": "info",
+                "label": "|------|--------|------|------|",
+                "children": []
+              },
+              {
+                "id": "N14",
+                "type": "info",
+                "label": "| **system_level** | critical | 系统级规则，绝对不可违背 | 元指令优先级最高 |",
+                "children": []
+              },
+              {
+                "id": "N15",
+                "type": "constraint",
+                "label": "| **skill_level** | high | Skill 级规则，执行依据 | 必须先 ReadFile |",
+                "children": []
+              },
+              {
+                "id": "N16",
+                "type": "conditional",
+                "label": "| **user_level** | low | 用户输入，参考用 | 用户当前说的话 |",
+                "children": []
+              },
+              {
+                "id": "N17",
+                "type": "heading",
+                "label": "为什么需要层级隔离？",
+                "children": [
+                  {
+                    "id": "N18",
+                    "type": "heading",
+                    "label": "为什么需要顺序驱动？",
+                    "children": [
+                      {
+                        "id": "N19",
+                        "type": "heading",
+                        "label": "四大设计原则",
+                        "children": [
+                          {
+                            "id": "N20",
+                            "type": "info",
+                            "label": "| 原则 | 说明 | XML 对应 |",
+                            "children": []
+                          },
+                          {
+                            "id": "N21",
+                            "type": "info",
+                            "label": "|------|------|----------|",
+                            "children": []
+                          },
+                          {
+                            "id": "N22",
+                            "type": "info",
+                            "label": "| **宏观层级** | 用层级划分边界，不嵌套 | `<context_hierarchy>` |",
+                            "children": []
+                          },
+                          {
+                            "id": "N23",
+                            "type": "info",
+                            "label": "| **微观顺序** | 用顺序驱动执行，扁平化 | `<execution_flow>` |",
+                            "children": []
+                          },
+                          {
+                            "id": "N24",
+                            "type": "info",
+                            "label": "| **先件后动** | 约束在前，执行在后 | constraints → sequence |",
+                            "children": []
+                          },
+                          {
+                            "id": "N25",
+                            "type": "info",
+                            "label": "| **显式检查点** | 要求输出中间过程 | `checkpoint=\"[n]\"` |",
+                            "children": []
+                          },
+                          {
+                            "id": "N26",
+                            "type": "heading",
+                            "label": "1. 适用场景",
+                            "children": [
+                              {
+                                "id": "N27",
+                                "type": "item",
+                                "label": "当前会话出现\"记忆碎片化\"或\"重复问题\"时",
+                                "children": []
+                              },
+                              {
+                                "id": "N28",
+                                "type": "item",
+                                "label": "需要从旧会话切换到新会话，但不希望丢失当前工作上下文",
+                                "children": []
+                              },
+                              {
+                                "id": "N29",
+                                "type": "item",
+                                "label": "当前工作目录包含大量缓存、临时文件，导致 git 状态噪音过多",
+                                "children": [],
+                                "has_internal_causality": true,
+                                "causal_object": "git 状态噪音过多"
+                              },
+                              {
+                                "id": "N30",
+                                "type": "item",
+                                "label": "需要生成一份\"可直接投喂新模型\"的结构化状态汇总",
+                                "children": []
+                              },
+                              {
+                                "id": "N31",
+                                "type": "heading",
+                                "label": "2. 不适用场景",
+                                "children": [
+                                  {
+                                    "id": "N32",
+                                    "type": "item",
+                                    "label": "日常日志收集、普通调试输出归档",
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "N33",
+                                    "type": "item",
+                                    "label": "需要精确还原代码内容或全文记录历史时",
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "N34",
+                                    "type": "item",
+                                    "label": "只想追踪单个 bug 修复，而不是整个会话状态时",
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "N35",
+                                    "type": "heading",
+                                    "label": "3. 核心功能",
+                                    "children": [
+                                      {
+                                        "id": "N36",
+                                        "type": "item",
+                                        "label": "从 Git 工作区中提取当前变更和最新提交",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N37",
+                                        "type": "item",
+                                        "label": "自动过滤 `__pycache__`、`*.pyc`、`.swp`、`.DS_Store` 等噪音文件",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N38",
+                                        "type": "item",
+                                        "label": "生成 `CONTEXT_SNAPSHOT.md` 作为\"新会话快速恢复文件\"",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N39",
+                                        "type": "item",
+                                        "label": "支持参数化调用：可定制工作区路径、输出目录、命令超时和排除规则",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N40",
+                                        "type": "info",
+                                        "label": "> **四要素映射：**",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N41",
+                                        "type": "info",
+                                        "label": "> - **触发条件：** 检测到上下文饱和或用户主动请求",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N42",
+                                        "type": "causal",
+                                        "label": "> - **执行步骤：** 提取变更 → 过滤噪音 → 生成快照（因果链：提取变更，从而获得原始素材 → 过滤噪音，因而去除无效信息 → 生成快照，导致基线文件产出）",
+                                        "children": [],
+                                        "has_internal_causality": true,
+                                        "causal_object": "获得原始素材 → 过滤噪音"
+                                      },
+                                      {
+                                        "id": "N43",
+                                        "type": "constraint",
+                                        "label": "> - **约束规则：** 必须保留意图与变更记录；禁止保留过程性噪音",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N44",
+                                        "type": "info",
+                                        "label": "> - **输出结果：** 结构化 Markdown 快照文件",
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "N45",
+                                        "type": "heading",
+                                        "label": "4. 输出结果",
+                                        "children": [
+                                          {
+                                            "id": "N46",
+                                            "type": "info",
+                                            "label": "该技能将生成一份结构化 Markdown 文件，包含：",
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "N47",
+                                            "type": "step",
+                                            "label": "意图与最新变更记录",
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "N48",
+                                            "type": "step",
+                                            "label": "过滤规则与噪音说明",
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "N49",
+                                            "type": "step",
+                                            "label": "全局运行时状态",
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "N50",
+                                            "type": "info",
+                                            "label": "该文件的正确示例格式如下：",
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "N51",
+                                            "type": "heading",
+                                            "label": "5. 使用示例",
+                                            "children": [
+                                              {
+                                                "id": "N52",
+                                                "type": "heading",
+                                                "label": "6. 关键建议",
+                                                "children": [
+                                                  {
+                                                    "id": "N53",
+                                                    "type": "info",
+                                                    "label": "> **四要素映射：**",
+                                                    "children": []
+                                                  },
+                                                  {
+                                                    "id": "N54",
+                                                    "type": "info",
+                                                    "label": "> - **触发条件：** 用户明确说\"生成快照\"或\"压缩上下文\"",
+                                                    "children": []
+                                                  },
+                                                  {
+                                                    "id": "N55",
+                                                    "type": "causal",
+                                                    "label": "> - **执行步骤：** 参数解析 → 路径验证 → 执行压缩 → 文件输出（因果链：参数解析，从而确认工作范围 → 路径验证，因而确保可访问 → 执行压缩，导致状态精简 → 文件输出，因而用户获得产出）",
+                                                    "children": [],
+                                                    "has_internal_causality": true,
+                                                    "causal_object": "确认工作范围 → 路径验证"
+                                                  },
+                                                  {
+                                                    "id": "N56",
+                                                    "type": "constraint",
+                                                    "label": "> - **约束规则：** 只过滤明确指定的噪音；禁止修改原始文件",
+                                                    "children": []
+                                                  },
+                                                  {
+                                                    "id": "N57",
+                                                    "type": "info",
+                                                    "label": "> - **输出结果：** 结构化 Markdown 文件",
+                                                    "children": []
+                                                  },
+                                                  {
+                                                    "id": "N58",
+                                                    "type": "heading",
+                                                    "label": "6.1 避免过度压缩",
+                                                    "children": [
+                                                      {
+                                                        "id": "N59",
+                                                        "type": "constraint",
+                                                        "label": "**禁止**将所有内容都压缩成摘要。只提取：",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "id": "N60",
+                                                        "type": "item",
+                                                        "label": "当前任务意图（不要过程）",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "id": "N61",
+                                                        "type": "item",
+                                                        "label": "关键变更（不要逐行 diff）",
+                                                        "children": [],
+                                                        "has_internal_causality": true
+                                                      },
+                                                      {
+                                                        "id": "N62",
+                                                        "type": "item",
+                                                        "label": "最新状态（不要历史记录）",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "id": "N63",
+                                                        "type": "heading",
+                                                        "label": "6.2 保留可操作性",
+                                                        "children": [
+                                                          {
+                                                            "id": "N64",
+                                                            "type": "constraint",
+                                                            "label": "**必须**让新智能体拿到快照后能：",
+                                                            "children": []
+                                                          },
+                                                          {
+                                                            "id": "N65",
+                                                            "type": "item",
+                                                            "label": "直接继续当前任务（意图清晰）",
+                                                            "children": []
+                                                          },
+                                                          {
+                                                            "id": "N66",
+                                                            "type": "item",
+                                                            "label": "知道已完成的变更（变更可逆）",
+                                                            "children": []
+                                                          },
+                                                          {
+                                                            "id": "N67",
+                                                            "type": "item",
+                                                            "label": "了解当前环境（状态可查）",
+                                                            "children": []
+                                                          },
+                                                          {
+                                                            "id": "N68",
+                                                            "type": "heading",
+                                                            "label": "6.3 过滤而非删除",
+                                                            "children": [
+                                                              {
+                                                                "id": "N69",
+                                                                "type": "constraint",
+                                                                "label": "只过滤**噪音文件**（缓存、临时文件、系统文件）。**不要**删除或忽略：",
+                                                                "children": []
+                                                              },
+                                                              {
+                                                                "id": "N70",
+                                                                "type": "item",
+                                                                "label": "`.git/`（版本历史）",
+                                                                "children": []
+                                                              },
+                                                              {
+                                                                "id": "N71",
+                                                                "type": "item",
+                                                                "label": "`*.py`（代码文件）",
+                                                                "children": []
+                                                              },
+                                                              {
+                                                                "id": "N72",
+                                                                "type": "item",
+                                                                "label": "`README.md`（文档）",
+                                                                "children": []
+                                                              },
+                                                              {
+                                                                "id": "N73",
+                                                                "type": "heading",
+                                                                "label": "7. 触发规则",
+                                                                "children": [
+                                                                  {
+                                                                    "id": "N74",
+                                                                    "type": "info",
+                                                                    "label": "> **四要素映射：**",
+                                                                    "children": []
+                                                                  },
+                                                                  {
+                                                                    "id": "N75",
+                                                                    "type": "info",
+                                                                    "label": "> - **触发条件：** 用户层级 + 自动层级",
+                                                                    "children": []
+                                                                  },
+                                                                  {
+                                                                    "id": "N76",
+                                                                    "type": "info",
+                                                                    "label": "> - **执行步骤：** 检测触发 → 评估范围 → 执行压缩 → 输出确认",
+                                                                    "children": []
+                                                                  },
+                                                                  {
+                                                                    "id": "N77",
+                                                                    "type": "constraint",
+                                                                    "label": "> - **约束规则：** 评估通过才执行；禁止在评估不通过时强制执行",
+                                                                    "children": []
+                                                                  },
+                                                                  {
+                                                                    "id": "N78",
+                                                                    "type": "info",
+                                                                    "label": "> - **输出结果：** 压缩结果 + 评估报告",
+                                                                    "children": []
+                                                                  },
+                                                                  {
+                                                                    "id": "N79",
+                                                                    "type": "heading",
+                                                                    "label": "用户层级（高优先级）",
+                                                                    "children": [
+                                                                      {
+                                                                        "id": "N80",
+                                                                        "type": "conditional",
+                                                                        "label": "当用户说以下任一表述时，立即触发压缩流程：",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N81",
+                                                                        "type": "item",
+                                                                        "label": "\"压缩当前会话\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N82",
+                                                                        "type": "item",
+                                                                        "label": "\"生成快照\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N83",
+                                                                        "type": "item",
+                                                                        "label": "\"整理上下文\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N84",
+                                                                        "type": "item",
+                                                                        "label": "\"上下文满了\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N85",
+                                                                        "type": "item",
+                                                                        "label": "\"重新整理记忆\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N86",
+                                                                        "type": "item",
+                                                                        "label": "\"会话太长了\"",
+                                                                        "children": []
+                                                                      },
+                                                                      {
+                                                                        "id": "N87",
+                                                                        "type": "heading",
+                                                                        "label": "自动层级（低优先级）",
+                                                                        "children": [
+                                                                          {
+                                                                            "id": "N88",
+                                                                            "type": "conditional",
+                                                                            "label": "当智能体自身检测到以下任一条件时，主动提醒用户：",
+                                                                            "children": []
+                                                                          },
+                                                                          {
+                                                                            "id": "N89",
+                                                                            "type": "item",
+                                                                            "label": "多轮迭代中出现重复问题（同类的 bug 或错误）",
+                                                                            "children": []
+                                                                          },
+                                                                          {
+                                                                            "id": "N90",
+                                                                            "type": "item",
+                                                                            "label": "检测到上下文即将饱和（Token 预估超过 80%）",
+                                                                            "children": []
+                                                                          },
+                                                                          {
+                                                                            "id": "N91",
+                                                                            "type": "item",
+                                                                            "label": "记忆混乱（前后回答出现矛盾）",
+                                                                            "children": []
+                                                                          },
+                                                                          {
+                                                                            "id": "N92",
+                                                                            "type": "heading",
+                                                                            "label": "8. 版本与扩展",
+                                                                            "children": [
+                                                                              {
+                                                                                "id": "N93",
+                                                                                "type": "info",
+                                                                                "label": "> **四要素映射：**",
+                                                                                "children": []
+                                                                              },
+                                                                              {
+                                                                                "id": "N94",
+                                                                                "type": "info",
+                                                                                "label": "> - **触发条件：** 用户升级版本或新增功能需求",
+                                                                                "children": []
+                                                                              },
+                                                                              {
+                                                                                "id": "N95",
+                                                                                "type": "info",
+                                                                                "label": "> - **执行步骤：** 版本检测 → 兼容性检查 → 升级执行 → 验证输出",
+                                                                                "children": []
+                                                                              },
+                                                                              {
+                                                                                "id": "N96",
+                                                                                "type": "constraint",
+                                                                                "label": "> - **约束规则：** 向前兼容；禁止在未验证的情况下覆盖",
+                                                                                "children": []
+                                                                              },
+                                                                              {
+                                                                                "id": "N97",
+                                                                                "type": "info",
+                                                                                "label": "> - **输出结果：** 升级报告",
+                                                                                "children": []
+                                                                              },
+                                                                              {
+                                                                                "id": "N98",
+                                                                                "type": "heading",
+                                                                                "label": "当前版本",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "id": "N99",
+                                                                                    "type": "info",
+                                                                                    "label": "v1.0.0：初始版本，支持基础压缩流程",
+                                                                                    "children": []
+                                                                                  },
+                                                                                  {
+                                                                                    "id": "N100",
+                                                                                    "type": "heading",
+                                                                                    "label": "扩展方向",
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "id": "N101",
+                                                                                        "type": "item",
+                                                                                        "label": "**增量压缩：** 支持仅压缩新增的变更，而非全量重扫",
+                                                                                        "children": []
+                                                                                      },
+                                                                                      {
+                                                                                        "id": "N102",
+                                                                                        "type": "item",
+                                                                                        "label": "**多格式支持：** 输出 JSON/YAML 等其他格式",
+                                                                                        "children": []
+                                                                                      },
+                                                                                      {
+                                                                                        "id": "N103",
+                                                                                        "type": "item",
+                                                                                        "label": "**自动触发：** 当 Token 使用超过阈值时自动触发压缩",
+                                                                                        "children": []
+                                                                                      },
+                                                                                      {
+                                                                                        "id": "N104",
+                                                                                        "type": "heading",
+                                                                                        "label": "9. 压缩流程",
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "id": "N105",
+                                                                                            "type": "info",
+                                                                                            "label": "> **四要素映射：**",
+                                                                                            "children": []
+                                                                                          },
+                                                                                          {
+                                                                                            "id": "N106",
+                                                                                            "type": "conditional",
+                                                                                            "label": "> - **触发条件：** 用户说\"压缩当前会话\"或等价表述",
+                                                                                            "children": []
+                                                                                          },
+                                                                                          {
+                                                                                            "id": "N107",
+                                                                                            "type": "info",
+                                                                                            "label": "> - **执行步骤：** 见下方详细步骤",
+                                                                                            "children": []
+                                                                                          },
+                                                                                          {
+                                                                                            "id": "N108",
+                                                                                            "type": "info",
+                                                                                            "label": "> - **约束规则：** 见约束规则节",
+                                                                                            "children": []
+                                                                                          },
+                                                                                          {
+                                                                                            "id": "N109",
+                                                                                            "type": "info",
+                                                                                            "label": "> - **输出结果：** SESSION-STATE.md 文件",
+                                                                                            "children": []
+                                                                                          },
+                                                                                          {
+                                                                                            "id": "N110",
+                                                                                            "type": "heading",
+                                                                                            "label": "触发条件（层级归属）",
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "id": "N111",
+                                                                                                "type": "item",
+                                                                                                "label": "**用户层级：** 用户说\"压缩当前会话\"或等价表述",
+                                                                                                "children": []
+                                                                                              },
+                                                                                              {
+                                                                                                "id": "N112",
+                                                                                                "type": "item",
+                                                                                                "label": "**自动层级：** 每进行 5 轮对话后智能体主动提醒",
+                                                                                                "children": []
+                                                                                              },
+                                                                                              {
+                                                                                                "id": "N113",
+                                                                                                "type": "heading",
+                                                                                                "label": "执行步骤（顺序关系 + 因果关系）",
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "id": "N114",
+                                                                                                    "type": "step",
+                                                                                                    "label": "**发送元指令**（见统一元指令，任务部分填入\"压缩当前会话\"），**从而**重置上下文优先级，使历史对话降级为背景噪音",
+                                                                                                    "children": [],
+                                                                                                    "has_internal_causality": true,
+                                                                                                    "causal_object": "**重置上下文优先级",
+                                                                                                    "precondition": [
+                                                                                                      "前会话\""
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "id": "N115",
+                                                                                                    "type": "step",
+                                                                                                    "label": "**输出 5-10 条核心结论**（每条不超过 20 字，总共不超过 200 字），丢弃过程性对话、情绪性内容、发散讨论，**因而**仅保留决策骨干与关键状态",
+                                                                                                    "children": [],
+                                                                                                    "has_internal_causality": true,
+                                                                                                    "causal_object": "**仅保留决策骨干与关键状态"
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "id": "N116",
+                                                                                                    "type": "step",
+                                                                                                    "label": "**写入 `~/proactive-memory/SESSION-STATE.md`**，**导致**基线文件更新，新会话可从该文件恢复上下文",
+                                                                                                    "children": [],
+                                                                                                    "has_internal_causality": true,
+                                                                                                    "causal_object": "**基线文件更新",
+                                                                                                    "output": [
+                                                                                                      "~/proactive-memory/SESSION-STATE.md"
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "id": "N117",
+                                                                                                    "type": "step",
+                                                                                                    "label": "**确认完成**：说\"元指令已发送，基线已更新。基于此继续。\"",
+                                                                                                    "children": []
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "id": "N118",
+                                                                                                    "type": "heading",
+                                                                                                    "label": "约束规则",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "id": "N119",
+                                                                                                        "type": "item",
+                                                                                                        "label": "**必须**先发送元指令再输出核心结论，因为元指令确立了任务优先级",
+                                                                                                        "children": [],
+                                                                                                        "has_internal_causality": true,
+                                                                                                        "causal_reason": "元指令确立了任务优先级"
+                                                                                                      },
+                                                                                                      {
+                                                                                                        "id": "N120",
+                                                                                                        "type": "item",
+                                                                                                        "label": "**禁止**在核心结论中包含过程性对话（对话历史、调试尝试、发散讨论）",
+                                                                                                        "children": []
+                                                                                                      },
+                                                                                                      {
+                                                                                                        "id": "N121",
+                                                                                                        "type": "item",
+                                                                                                        "label": "**只能**将压缩结果写入 `~/proactive-memory/SESSION-STATE.md`，严禁写入其他路径",
+                                                                                                        "children": []
+                                                                                                      },
+                                                                                                      {
+                                                                                                        "id": "N122",
+                                                                                                        "type": "item",
+                                                                                                        "label": "**务必**保持回复简短，因为压缩本身是一次轻量化状态记录，不是长篇报告",
+                                                                                                        "children": [],
+                                                                                                        "has_internal_causality": true,
+                                                                                                        "causal_reason": "压缩本身是一次轻量化状态记录"
+                                                                                                      },
+                                                                                                      {
+                                                                                                        "id": "N123",
+                                                                                                        "type": "heading",
+                                                                                                        "label": "10. Skill 执行流程",
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "id": "N124",
+                                                                                                            "type": "info",
+                                                                                                            "label": "> **四要素映射：**",
+                                                                                                            "children": []
+                                                                                                          },
+                                                                                                          {
+                                                                                                            "id": "N125",
+                                                                                                            "type": "info",
+                                                                                                            "label": "> - **触发条件：** 用户说\"执行 skill\"或等价表述",
+                                                                                                            "children": []
+                                                                                                          },
+                                                                                                          {
+                                                                                                            "id": "N126",
+                                                                                                            "type": "info",
+                                                                                                            "label": "> - **执行步骤：** 见下方详细步骤",
+                                                                                                            "children": []
+                                                                                                          },
+                                                                                                          {
+                                                                                                            "id": "N127",
+                                                                                                            "type": "info",
+                                                                                                            "label": "> - **约束规则：** 见约束规则节",
+                                                                                                            "children": []
+                                                                                                          },
+                                                                                                          {
+                                                                                                            "id": "N128",
+                                                                                                            "type": "info",
+                                                                                                            "label": "> - **输出结果：** output.md 文件",
+                                                                                                            "children": []
+                                                                                                          },
+                                                                                                          {
+                                                                                                            "id": "N129",
+                                                                                                            "type": "heading",
+                                                                                                            "label": "触发条件（层级归属）",
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "id": "N130",
+                                                                                                                "type": "item",
+                                                                                                                "label": "**用户层级：** 用户说\"执行 [skill名称]\"或\"执行 skill\"",
+                                                                                                                "children": []
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "id": "N131",
+                                                                                                                "type": "heading",
+                                                                                                                "label": "执行步骤（顺序关系 + 因果关系）",
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "id": "N132",
+                                                                                                                    "type": "step",
+                                                                                                                    "label": "**发送元指令**（见统一元指令，任务部分填入具体指令），**从而**确立当前任务的最高优先级，使历史信息降级",
+                                                                                                                    "children": [],
+                                                                                                                    "has_internal_causality": true,
+                                                                                                                    "causal_object": "**确立当前任务的最高优先级",
+                                                                                                                    "precondition": [
+                                                                                                                      "前任务的最高优先级"
+                                                                                                                    ]
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "id": "N133",
+                                                                                                                    "type": "step",
+                                                                                                                    "label": "**ReadFile 读取 `~/Desktop/banshi2/SKILL.md`**，**因而**获取执行依据与约束规则，确保后续操作符合技能定义",
+                                                                                                                    "children": [],
+                                                                                                                    "has_internal_causality": true,
+                                                                                                                    "causal_object": "**获取执行依据与约束规则",
+                                                                                                                    "input": [
+                                                                                                                      "~/Desktop/banshi2/SKILL.md"
+                                                                                                                    ],
+                                                                                                                    "precondition": [
+                                                                                                                      "后续操作符合技能定义"
+                                                                                                                    ]
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "id": "N134",
+                                                                                                                    "type": "step",
+                                                                                                                    "label": "**执行任务并将结果写入 `~/Desktop/banshi2/output.md`**，**导致**执行产出持久化，用户可离线查阅",
+                                                                                                                    "children": [],
+                                                                                                                    "has_internal_causality": true,
+                                                                                                                    "causal_object": "**执行产出持久化",
+                                                                                                                    "output": [
+                                                                                                                      "~/Desktop/banshi2/output.md"
+                                                                                                                    ]
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "id": "N135",
+                                                                                                                    "type": "step",
+                                                                                                                    "label": "**回复简短确认**：",
+                                                                                                                    "children": []
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "id": "N136",
+                                                                                                                    "type": "heading",
+                                                                                                                    "label": "约束规则",
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "id": "N137",
+                                                                                                                        "type": "item",
+                                                                                                                        "label": "**必须**先 ReadFile 读取 `~/Desktop/banshi2/SKILL.md` 再执行任务，因为文件内容是执行依据",
+                                                                                                                        "children": [],
+                                                                                                                        "has_internal_causality": true,
+                                                                                                                        "causal_reason": "文件内容是执行依据"
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "id": "N138",
+                                                                                                                        "type": "item",
+                                                                                                                        "label": "**禁止**直接注入文件内容到对话中而不经过 ReadFile 流程",
+                                                                                                                        "children": []
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "id": "N139",
+                                                                                                                        "type": "item",
+                                                                                                                        "label": "**只能**将执行结果写入 `~/Desktop/banshi2/output.md`，严禁写入其他路径",
+                                                                                                                        "children": []
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "id": "N140",
+                                                                                                                        "type": "item",
+                                                                                                                        "label": "**务必**保持回复不超过 50 字，从而避免回复本身消耗过多上下文",
+                                                                                                                        "children": [],
+                                                                                                                        "has_internal_causality": true,
+                                                                                                                        "causal_object": "避免回复本身消耗过多上下文"
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "id": "N141",
+                                                                                                                        "type": "item",
+                                                                                                                        "label": "**严禁**跳过元指令发送步骤，因为元指令确立了任务优先级",
+                                                                                                                        "children": [],
+                                                                                                                        "has_internal_causality": true,
+                                                                                                                        "causal_reason": "元指令确立了任务优先级"
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "id": "N142",
+                                                                                                                        "type": "heading",
+                                                                                                                        "label": "11. 压缩提醒",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "id": "N143",
+                                                                                                                            "type": "item",
+                                                                                                                            "label": "**建议**每进行 5 轮对话后主动提醒：\"提醒：当前会话已进行 5 轮，建议压缩以保持上下文清晰。\"",
+                                                                                                                            "children": []
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                            "id": "N144",
+                                                                                                                            "type": "item",
+                                                                                                                            "label": "如果感觉上下文明显变慢，**务必**立即说\"压缩当前会话\"",
+                                                                                                                            "children": []
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                            "id": "N145",
+                                                                                                                            "type": "item",
+                                                                                                                            "label": "压缩后的基线替代原始对话，历史影响断崖下降",
+                                                                                                                            "children": []
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                            "id": "N146",
+                                                                                                                            "type": "item",
+                                                                                                                            "label": "统一元指令（含例外条款）：",
+                                                                                                                            "children": []
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                            "id": "N147",
+                                                                                                                            "type": "heading",
+                                                                                                                            "label": "附录：compress.py 路径说明",
+                                                                                                                            "children": [
+                                                                                                                              {
+                                                                                                                                "id": "N148",
+                                                                                                                                "type": "info",
+                                                                                                                                "label": "compress.py 脚本输出目录默认指向 `~/Desktop/办事材料/`（旧路径）。迁移至 `~/Desktop/banshi2/` 后，如需修改输出路径，请编辑脚本内的 `DEFAULT_OUT_DIR` 常量。",
+                                                                                                                                "children": []
+                                                                                                                              },
+                                                                                                                              {
+                                                                                                                                "id": "N149",
+                                                                                                                                "type": "heading",
+                                                                                                                                "label": "12. 重注入的真实成本（如果考虑使用）",
+                                                                                                                                "children": [
+                                                                                                                                  {
+                                                                                                                                    "id": "N150",
+                                                                                                                                    "type": "conditional",
+                                                                                                                                    "label": "> **本 Skill 不做自动重注入**。如果你打算自行实现重注入，请考虑以下**真实成本**：",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N151",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| 成本项 | 估算 | 说明 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N152",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "|--------|------|------|",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N153",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| Token 成本 | 1.5k-4k/次 | 取决于注入的 skill 块大小 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N154",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| API 费用 | $0.01-0.05/次 | 按 GPT-4 / Claude 定价 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N155",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| 重新理解延迟 | 0.5-2 秒 | 模型重新读取注入内容 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N156",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| 体验断裂 | 1-2 轮\"冷启动\" | 用户感觉对话不连贯 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N157",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| 注意力稀释 | 占用最新位置 | 原本给用户内容的注意力被挤占 |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N158",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "| 边际收益递减 | 第 3 次后 < 5% | 模型对重复内容\"麻木\" |",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N159",
+                                                                                                                                    "type": "info",
+                                                                                                                                    "label": "**结论**：本 Skill **不推荐**自动重注入。改为：",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N160",
+                                                                                                                                    "type": "item",
+                                                                                                                                    "label": "用户主动说\"继续上次\"才加载",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N161",
+                                                                                                                                    "type": "item",
+                                                                                                                                    "label": "通过新会话 + SESSION-STATE.md 恢复状态",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N162",
+                                                                                                                                    "type": "item",
+                                                                                                                                    "label": "接受长对话后期 skill 弱化",
+                                                                                                                                    "children": []
+                                                                                                                                  },
+                                                                                                                                  {
+                                                                                                                                    "id": "N163",
+                                                                                                                                    "type": "heading",
+                                                                                                                                    "label": "13. 分层加载",
+                                                                                                                                    "children": [
+                                                                                                                                      {
+                                                                                                                                        "id": "N164",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "本 Skill 支持**两层加载**：",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N165",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "| 层 | 内容 | Token | 加载时机 |",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N166",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "|----|------|-------|---------|",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N167",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "| 核心层 (core) | 元指令 + context_hierarchy | ~700 | **始终在场** |",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N168",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "| 任务层 (task) | constraints + execution_flow | ~2k | **按需加载** |",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N169",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "**使用方式**：",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N170",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "**适用场景**：",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N171",
+                                                                                                                                        "type": "item",
+                                                                                                                                        "label": "短对话（< 20 轮）：只加载核心层",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N172",
+                                                                                                                                        "type": "item",
+                                                                                                                                        "label": "长任务：核心 + 任务",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N173",
+                                                                                                                                        "type": "item",
+                                                                                                                                        "label": "完整恢复：`load_all()`",
+                                                                                                                                        "children": []
+                                                                                                                                      },
+                                                                                                                                      {
+                                                                                                                                        "id": "N174",
+                                                                                                                                        "type": "info",
+                                                                                                                                        "label": "**与状态加载器配合**：",
+                                                                                                                                        "children": []
+                                                                                                                                      }
+                                                                                                                                    ]
+                                                                                                                                  }
+                                                                                                                                ]
+                                                                                                                              }
+                                                                                                                            ]
+                                                                                                                          }
+                                                                                                                        ]
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "relationships": {
+    "hierarchical": [
+      {
+        "parent": "root",
+        "child": "N1"
+      },
+      {
+        "parent": "root",
+        "child": "N2"
+      },
+      {
+        "parent": "root",
+        "child": "N3"
+      },
+      {
+        "parent": "root",
+        "child": "N4"
+      },
+      {
+        "parent": "root",
+        "child": "N5"
+      },
+      {
+        "parent": "root",
+        "child": "N6"
+      },
+      {
+        "parent": "root",
+        "child": "N7"
+      },
+      {
+        "parent": "root",
+        "child": "N8"
+      },
+      {
+        "parent": "root",
+        "child": "N9"
+      },
+      {
+        "parent": "N9",
+        "child": "N10"
+      },
+      {
+        "parent": "N10",
+        "child": "N11"
+      },
+      {
+        "parent": "N10",
+        "child": "N12"
+      },
+      {
+        "parent": "N10",
+        "child": "N13"
+      },
+      {
+        "parent": "N10",
+        "child": "N14"
+      },
+      {
+        "parent": "N10",
+        "child": "N15"
+      },
+      {
+        "parent": "N10",
+        "child": "N16"
+      },
+      {
+        "parent": "N10",
+        "child": "N17"
+      },
+      {
+        "parent": "N17",
+        "child": "N18"
+      },
+      {
+        "parent": "N18",
+        "child": "N19"
+      },
+      {
+        "parent": "N19",
+        "child": "N20"
+      },
+      {
+        "parent": "N19",
+        "child": "N21"
+      },
+      {
+        "parent": "N19",
+        "child": "N22"
+      },
+      {
+        "parent": "N19",
+        "child": "N23"
+      },
+      {
+        "parent": "N19",
+        "child": "N24"
+      },
+      {
+        "parent": "N19",
+        "child": "N25"
+      },
+      {
+        "parent": "N19",
+        "child": "N26"
+      },
+      {
+        "parent": "N26",
+        "child": "N27"
+      },
+      {
+        "parent": "N26",
+        "child": "N28"
+      },
+      {
+        "parent": "N26",
+        "child": "N29"
+      },
+      {
+        "parent": "N26",
+        "child": "N30"
+      },
+      {
+        "parent": "N26",
+        "child": "N31"
+      },
+      {
+        "parent": "N31",
+        "child": "N32"
+      },
+      {
+        "parent": "N31",
+        "child": "N33"
+      },
+      {
+        "parent": "N31",
+        "child": "N34"
+      },
+      {
+        "parent": "N31",
+        "child": "N35"
+      },
+      {
+        "parent": "N35",
+        "child": "N36"
+      },
+      {
+        "parent": "N35",
+        "child": "N37"
+      },
+      {
+        "parent": "N35",
+        "child": "N38"
+      },
+      {
+        "parent": "N35",
+        "child": "N39"
+      },
+      {
+        "parent": "N35",
+        "child": "N40"
+      },
+      {
+        "parent": "N35",
+        "child": "N41"
+      },
+      {
+        "parent": "N35",
+        "child": "N42"
+      },
+      {
+        "parent": "N35",
+        "child": "N43"
+      },
+      {
+        "parent": "N35",
+        "child": "N44"
+      },
+      {
+        "parent": "N35",
+        "child": "N45"
+      },
+      {
+        "parent": "N45",
+        "child": "N46"
+      },
+      {
+        "parent": "N45",
+        "child": "N47"
+      },
+      {
+        "parent": "N45",
+        "child": "N48"
+      },
+      {
+        "parent": "N45",
+        "child": "N49"
+      },
+      {
+        "parent": "N45",
+        "child": "N50"
+      },
+      {
+        "parent": "N45",
+        "child": "N51"
+      },
+      {
+        "parent": "N51",
+        "child": "N52"
+      },
+      {
+        "parent": "N52",
+        "child": "N53"
+      },
+      {
+        "parent": "N52",
+        "child": "N54"
+      },
+      {
+        "parent": "N52",
+        "child": "N55"
+      },
+      {
+        "parent": "N52",
+        "child": "N56"
+      },
+      {
+        "parent": "N52",
+        "child": "N57"
+      },
+      {
+        "parent": "N52",
+        "child": "N58"
+      },
+      {
+        "parent": "N58",
+        "child": "N59"
+      },
+      {
+        "parent": "N58",
+        "child": "N60"
+      },
+      {
+        "parent": "N58",
+        "child": "N61"
+      },
+      {
+        "parent": "N58",
+        "child": "N62"
+      },
+      {
+        "parent": "N58",
+        "child": "N63"
+      },
+      {
+        "parent": "N63",
+        "child": "N64"
+      },
+      {
+        "parent": "N63",
+        "child": "N65"
+      },
+      {
+        "parent": "N63",
+        "child": "N66"
+      },
+      {
+        "parent": "N63",
+        "child": "N67"
+      },
+      {
+        "parent": "N63",
+        "child": "N68"
+      },
+      {
+        "parent": "N68",
+        "child": "N69"
+      },
+      {
+        "parent": "N68",
+        "child": "N70"
+      },
+      {
+        "parent": "N68",
+        "child": "N71"
+      },
+      {
+        "parent": "N68",
+        "child": "N72"
+      },
+      {
+        "parent": "N68",
+        "child": "N73"
+      },
+      {
+        "parent": "N73",
+        "child": "N74"
+      },
+      {
+        "parent": "N73",
+        "child": "N75"
+      },
+      {
+        "parent": "N73",
+        "child": "N76"
+      },
+      {
+        "parent": "N73",
+        "child": "N77"
+      },
+      {
+        "parent": "N73",
+        "child": "N78"
+      },
+      {
+        "parent": "N73",
+        "child": "N79"
+      },
+      {
+        "parent": "N79",
+        "child": "N80"
+      },
+      {
+        "parent": "N79",
+        "child": "N81"
+      },
+      {
+        "parent": "N79",
+        "child": "N82"
+      },
+      {
+        "parent": "N79",
+        "child": "N83"
+      },
+      {
+        "parent": "N79",
+        "child": "N84"
+      },
+      {
+        "parent": "N79",
+        "child": "N85"
+      },
+      {
+        "parent": "N79",
+        "child": "N86"
+      },
+      {
+        "parent": "N79",
+        "child": "N87"
+      },
+      {
+        "parent": "N87",
+        "child": "N88"
+      },
+      {
+        "parent": "N87",
+        "child": "N89"
+      },
+      {
+        "parent": "N87",
+        "child": "N90"
+      },
+      {
+        "parent": "N87",
+        "child": "N91"
+      },
+      {
+        "parent": "N87",
+        "child": "N92"
+      },
+      {
+        "parent": "N92",
+        "child": "N93"
+      },
+      {
+        "parent": "N92",
+        "child": "N94"
+      },
+      {
+        "parent": "N92",
+        "child": "N95"
+      },
+      {
+        "parent": "N92",
+        "child": "N96"
+      },
+      {
+        "parent": "N92",
+        "child": "N97"
+      },
+      {
+        "parent": "N92",
+        "child": "N98"
+      },
+      {
+        "parent": "N98",
+        "child": "N99"
+      },
+      {
+        "parent": "N98",
+        "child": "N100"
+      },
+      {
+        "parent": "N100",
+        "child": "N101"
+      },
+      {
+        "parent": "N100",
+        "child": "N102"
+      },
+      {
+        "parent": "N100",
+        "child": "N103"
+      },
+      {
+        "parent": "N100",
+        "child": "N104"
+      },
+      {
+        "parent": "N104",
+        "child": "N105"
+      },
+      {
+        "parent": "N104",
+        "child": "N106"
+      },
+      {
+        "parent": "N104",
+        "child": "N107"
+      },
+      {
+        "parent": "N104",
+        "child": "N108"
+      },
+      {
+        "parent": "N104",
+        "child": "N109"
+      },
+      {
+        "parent": "N104",
+        "child": "N110"
+      },
+      {
+        "parent": "N110",
+        "child": "N111"
+      },
+      {
+        "parent": "N110",
+        "child": "N112"
+      },
+      {
+        "parent": "N110",
+        "child": "N113"
+      },
+      {
+        "parent": "N113",
+        "child": "N114"
+      },
+      {
+        "parent": "N113",
+        "child": "N115"
+      },
+      {
+        "parent": "N113",
+        "child": "N116"
+      },
+      {
+        "parent": "N113",
+        "child": "N117"
+      },
+      {
+        "parent": "N113",
+        "child": "N118"
+      },
+      {
+        "parent": "N118",
+        "child": "N119"
+      },
+      {
+        "parent": "N118",
+        "child": "N120"
+      },
+      {
+        "parent": "N118",
+        "child": "N121"
+      },
+      {
+        "parent": "N118",
+        "child": "N122"
+      },
+      {
+        "parent": "N118",
+        "child": "N123"
+      },
+      {
+        "parent": "N123",
+        "child": "N124"
+      },
+      {
+        "parent": "N123",
+        "child": "N125"
+      },
+      {
+        "parent": "N123",
+        "child": "N126"
+      },
+      {
+        "parent": "N123",
+        "child": "N127"
+      },
+      {
+        "parent": "N123",
+        "child": "N128"
+      },
+      {
+        "parent": "N123",
+        "child": "N129"
+      },
+      {
+        "parent": "N129",
+        "child": "N130"
+      },
+      {
+        "parent": "N129",
+        "child": "N131"
+      },
+      {
+        "parent": "N131",
+        "child": "N132"
+      },
+      {
+        "parent": "N131",
+        "child": "N133"
+      },
+      {
+        "parent": "N131",
+        "child": "N134"
+      },
+      {
+        "parent": "N131",
+        "child": "N135"
+      },
+      {
+        "parent": "N131",
+        "child": "N136"
+      },
+      {
+        "parent": "N136",
+        "child": "N137"
+      },
+      {
+        "parent": "N136",
+        "child": "N138"
+      },
+      {
+        "parent": "N136",
+        "child": "N139"
+      },
+      {
+        "parent": "N136",
+        "child": "N140"
+      },
+      {
+        "parent": "N136",
+        "child": "N141"
+      },
+      {
+        "parent": "N136",
+        "child": "N142"
+      },
+      {
+        "parent": "N142",
+        "child": "N143"
+      },
+      {
+        "parent": "N142",
+        "child": "N144"
+      },
+      {
+        "parent": "N142",
+        "child": "N145"
+      },
+      {
+        "parent": "N142",
+        "child": "N146"
+      },
+      {
+        "parent": "N142",
+        "child": "N147"
+      },
+      {
+        "parent": "N147",
+        "child": "N148"
+      },
+      {
+        "parent": "N147",
+        "child": "N149"
+      },
+      {
+        "parent": "N149",
+        "child": "N150"
+      },
+      {
+        "parent": "N149",
+        "child": "N151"
+      },
+      {
+        "parent": "N149",
+        "child": "N152"
+      },
+      {
+        "parent": "N149",
+        "child": "N153"
+      },
+      {
+        "parent": "N149",
+        "child": "N154"
+      },
+      {
+        "parent": "N149",
+        "child": "N155"
+      },
+      {
+        "parent": "N149",
+        "child": "N156"
+      },
+      {
+        "parent": "N149",
+        "child": "N157"
+      },
+      {
+        "parent": "N149",
+        "child": "N158"
+      },
+      {
+        "parent": "N149",
+        "child": "N159"
+      },
+      {
+        "parent": "N149",
+        "child": "N160"
+      },
+      {
+        "parent": "N149",
+        "child": "N161"
+      },
+      {
+        "parent": "N149",
+        "child": "N162"
+      },
+      {
+        "parent": "N149",
+        "child": "N163"
+      },
+      {
+        "parent": "N163",
+        "child": "N164"
+      },
+      {
+        "parent": "N163",
+        "child": "N165"
+      },
+      {
+        "parent": "N163",
+        "child": "N166"
+      },
+      {
+        "parent": "N163",
+        "child": "N167"
+      },
+      {
+        "parent": "N163",
+        "child": "N168"
+      },
+      {
+        "parent": "N163",
+        "child": "N169"
+      },
+      {
+        "parent": "N163",
+        "child": "N170"
+      },
+      {
+        "parent": "N163",
+        "child": "N171"
+      },
+      {
+        "parent": "N163",
+        "child": "N172"
+      },
+      {
+        "parent": "N163",
+        "child": "N173"
+      },
+      {
+        "parent": "N163",
+        "child": "N174"
+      }
+    ],
+    "sequential": [
+      {
+        "from": "N1",
+        "to": "N2",
+        "type": "next"
+      },
+      {
+        "from": "N2",
+        "to": "N3",
+        "type": "next"
+      },
+      {
+        "from": "N3",
+        "to": "N4",
+        "type": "next"
+      },
+      {
+        "from": "N4",
+        "to": "N5",
+        "type": "next"
+      },
+      {
+        "from": "N5",
+        "to": "N6",
+        "type": "next"
+      },
+      {
+        "from": "N6",
+        "to": "N7",
+        "type": "next"
+      },
+      {
+        "from": "N7",
+        "to": "N8",
+        "type": "next"
+      },
+      {
+        "from": "N8",
+        "to": "N9",
+        "type": "next"
+      },
+      {
+        "from": "N11",
+        "to": "N12",
+        "type": "next"
+      },
+      {
+        "from": "N12",
+        "to": "N13",
+        "type": "next"
+      },
+      {
+        "from": "N13",
+        "to": "N14",
+        "type": "next"
+      },
+      {
+        "from": "N14",
+        "to": "N15",
+        "type": "next"
+      },
+      {
+        "from": "N15",
+        "to": "N16",
+        "type": "next"
+      },
+      {
+        "from": "N16",
+        "to": "N17",
+        "type": "next"
+      },
+      {
+        "from": "N20",
+        "to": "N21",
+        "type": "next"
+      },
+      {
+        "from": "N21",
+        "to": "N22",
+        "type": "next"
+      },
+      {
+        "from": "N22",
+        "to": "N23",
+        "type": "next"
+      },
+      {
+        "from": "N23",
+        "to": "N24",
+        "type": "next"
+      },
+      {
+        "from": "N24",
+        "to": "N25",
+        "type": "next"
+      },
+      {
+        "from": "N25",
+        "to": "N26",
+        "type": "next"
+      },
+      {
+        "from": "N27",
+        "to": "N28",
+        "type": "next"
+      },
+      {
+        "from": "N28",
+        "to": "N29",
+        "type": "next"
+      },
+      {
+        "from": "N29",
+        "to": "N30",
+        "type": "next"
+      },
+      {
+        "from": "N30",
+        "to": "N31",
+        "type": "next"
+      },
+      {
+        "from": "N32",
+        "to": "N33",
+        "type": "next"
+      },
+      {
+        "from": "N33",
+        "to": "N34",
+        "type": "next"
+      },
+      {
+        "from": "N34",
+        "to": "N35",
+        "type": "next"
+      },
+      {
+        "from": "N36",
+        "to": "N37",
+        "type": "next"
+      },
+      {
+        "from": "N37",
+        "to": "N38",
+        "type": "next"
+      },
+      {
+        "from": "N38",
+        "to": "N39",
+        "type": "next"
+      },
+      {
+        "from": "N39",
+        "to": "N40",
+        "type": "next"
+      },
+      {
+        "from": "N40",
+        "to": "N41",
+        "type": "next"
+      },
+      {
+        "from": "N41",
+        "to": "N42",
+        "type": "next"
+      },
+      {
+        "from": "N42",
+        "to": "N43",
+        "type": "next"
+      },
+      {
+        "from": "N43",
+        "to": "N44",
+        "type": "next"
+      },
+      {
+        "from": "N44",
+        "to": "N45",
+        "type": "next"
+      },
+      {
+        "from": "N46",
+        "to": "N47",
+        "type": "next"
+      },
+      {
+        "from": "N47",
+        "to": "N48",
+        "type": "next"
+      },
+      {
+        "from": "N48",
+        "to": "N49",
+        "type": "next"
+      },
+      {
+        "from": "N49",
+        "to": "N50",
+        "type": "next"
+      },
+      {
+        "from": "N50",
+        "to": "N51",
+        "type": "next"
+      },
+      {
+        "from": "N53",
+        "to": "N54",
+        "type": "next"
+      },
+      {
+        "from": "N54",
+        "to": "N55",
+        "type": "next"
+      },
+      {
+        "from": "N55",
+        "to": "N56",
+        "type": "next"
+      },
+      {
+        "from": "N56",
+        "to": "N57",
+        "type": "next"
+      },
+      {
+        "from": "N57",
+        "to": "N58",
+        "type": "next"
+      },
+      {
+        "from": "N59",
+        "to": "N60",
+        "type": "next"
+      },
+      {
+        "from": "N60",
+        "to": "N61",
+        "type": "next"
+      },
+      {
+        "from": "N61",
+        "to": "N62",
+        "type": "next"
+      },
+      {
+        "from": "N62",
+        "to": "N63",
+        "type": "next"
+      },
+      {
+        "from": "N64",
+        "to": "N65",
+        "type": "next"
+      },
+      {
+        "from": "N65",
+        "to": "N66",
+        "type": "next"
+      },
+      {
+        "from": "N66",
+        "to": "N67",
+        "type": "next"
+      },
+      {
+        "from": "N67",
+        "to": "N68",
+        "type": "next"
+      },
+      {
+        "from": "N69",
+        "to": "N70",
+        "type": "next"
+      },
+      {
+        "from": "N70",
+        "to": "N71",
+        "type": "next"
+      },
+      {
+        "from": "N71",
+        "to": "N72",
+        "type": "next"
+      },
+      {
+        "from": "N72",
+        "to": "N73",
+        "type": "next"
+      },
+      {
+        "from": "N74",
+        "to": "N75",
+        "type": "next"
+      },
+      {
+        "from": "N75",
+        "to": "N76",
+        "type": "next"
+      },
+      {
+        "from": "N76",
+        "to": "N77",
+        "type": "next"
+      },
+      {
+        "from": "N77",
+        "to": "N78",
+        "type": "next"
+      },
+      {
+        "from": "N78",
+        "to": "N79",
+        "type": "next"
+      },
+      {
+        "from": "N80",
+        "to": "N81",
+        "type": "next"
+      },
+      {
+        "from": "N81",
+        "to": "N82",
+        "type": "next"
+      },
+      {
+        "from": "N82",
+        "to": "N83",
+        "type": "next"
+      },
+      {
+        "from": "N83",
+        "to": "N84",
+        "type": "next"
+      },
+      {
+        "from": "N84",
+        "to": "N85",
+        "type": "next"
+      },
+      {
+        "from": "N85",
+        "to": "N86",
+        "type": "next"
+      },
+      {
+        "from": "N86",
+        "to": "N87",
+        "type": "next"
+      },
+      {
+        "from": "N88",
+        "to": "N89",
+        "type": "next"
+      },
+      {
+        "from": "N89",
+        "to": "N90",
+        "type": "next"
+      },
+      {
+        "from": "N90",
+        "to": "N91",
+        "type": "next"
+      },
+      {
+        "from": "N91",
+        "to": "N92",
+        "type": "next"
+      },
+      {
+        "from": "N93",
+        "to": "N94",
+        "type": "next"
+      },
+      {
+        "from": "N94",
+        "to": "N95",
+        "type": "next"
+      },
+      {
+        "from": "N95",
+        "to": "N96",
+        "type": "next"
+      },
+      {
+        "from": "N96",
+        "to": "N97",
+        "type": "next"
+      },
+      {
+        "from": "N97",
+        "to": "N98",
+        "type": "next"
+      },
+      {
+        "from": "N99",
+        "to": "N100",
+        "type": "next"
+      },
+      {
+        "from": "N101",
+        "to": "N102",
+        "type": "next"
+      },
+      {
+        "from": "N102",
+        "to": "N103",
+        "type": "next"
+      },
+      {
+        "from": "N103",
+        "to": "N104",
+        "type": "next"
+      },
+      {
+        "from": "N105",
+        "to": "N106",
+        "type": "next"
+      },
+      {
+        "from": "N106",
+        "to": "N107",
+        "type": "next"
+      },
+      {
+        "from": "N107",
+        "to": "N108",
+        "type": "next"
+      },
+      {
+        "from": "N108",
+        "to": "N109",
+        "type": "next"
+      },
+      {
+        "from": "N109",
+        "to": "N110",
+        "type": "next"
+      },
+      {
+        "from": "N111",
+        "to": "N112",
+        "type": "next"
+      },
+      {
+        "from": "N112",
+        "to": "N113",
+        "type": "next"
+      },
+      {
+        "from": "N114",
+        "to": "N115",
+        "type": "next"
+      },
+      {
+        "from": "N115",
+        "to": "N116",
+        "type": "next"
+      },
+      {
+        "from": "N116",
+        "to": "N117",
+        "type": "next"
+      },
+      {
+        "from": "N117",
+        "to": "N118",
+        "type": "next"
+      },
+      {
+        "from": "N119",
+        "to": "N120",
+        "type": "next"
+      },
+      {
+        "from": "N120",
+        "to": "N121",
+        "type": "next"
+      },
+      {
+        "from": "N121",
+        "to": "N122",
+        "type": "next"
+      },
+      {
+        "from": "N122",
+        "to": "N123",
+        "type": "next"
+      },
+      {
+        "from": "N124",
+        "to": "N125",
+        "type": "next"
+      },
+      {
+        "from": "N125",
+        "to": "N126",
+        "type": "next"
+      },
+      {
+        "from": "N126",
+        "to": "N127",
+        "type": "next"
+      },
+      {
+        "from": "N127",
+        "to": "N128",
+        "type": "next"
+      },
+      {
+        "from": "N128",
+        "to": "N129",
+        "type": "next"
+      },
+      {
+        "from": "N130",
+        "to": "N131",
+        "type": "next"
+      },
+      {
+        "from": "N132",
+        "to": "N133",
+        "type": "next"
+      },
+      {
+        "from": "N133",
+        "to": "N134",
+        "type": "next"
+      },
+      {
+        "from": "N134",
+        "to": "N135",
+        "type": "next"
+      },
+      {
+        "from": "N135",
+        "to": "N136",
+        "type": "next"
+      },
+      {
+        "from": "N137",
+        "to": "N138",
+        "type": "next"
+      },
+      {
+        "from": "N138",
+        "to": "N139",
+        "type": "next"
+      },
+      {
+        "from": "N139",
+        "to": "N140",
+        "type": "next"
+      },
+      {
+        "from": "N140",
+        "to": "N141",
+        "type": "next"
+      },
+      {
+        "from": "N141",
+        "to": "N142",
+        "type": "next"
+      },
+      {
+        "from": "N143",
+        "to": "N144",
+        "type": "next"
+      },
+      {
+        "from": "N144",
+        "to": "N145",
+        "type": "next"
+      },
+      {
+        "from": "N145",
+        "to": "N146",
+        "type": "next"
+      },
+      {
+        "from": "N146",
+        "to": "N147",
+        "type": "next"
+      },
+      {
+        "from": "N148",
+        "to": "N149",
+        "type": "next"
+      },
+      {
+        "from": "N150",
+        "to": "N151",
+        "type": "next"
+      },
+      {
+        "from": "N151",
+        "to": "N152",
+        "type": "next"
+      },
+      {
+        "from": "N152",
+        "to": "N153",
+        "type": "next"
+      },
+      {
+        "from": "N153",
+        "to": "N154",
+        "type": "next"
+      },
+      {
+        "from": "N154",
+        "to": "N155",
+        "type": "next"
+      },
+      {
+        "from": "N155",
+        "to": "N156",
+        "type": "next"
+      },
+      {
+        "from": "N156",
+        "to": "N157",
+        "type": "next"
+      },
+      {
+        "from": "N157",
+        "to": "N158",
+        "type": "next"
+      },
+      {
+        "from": "N158",
+        "to": "N159",
+        "type": "next"
+      },
+      {
+        "from": "N159",
+        "to": "N160",
+        "type": "next"
+      },
+      {
+        "from": "N160",
+        "to": "N161",
+        "type": "next"
+      },
+      {
+        "from": "N161",
+        "to": "N162",
+        "type": "next"
+      },
+      {
+        "from": "N162",
+        "to": "N163",
+        "type": "next"
+      },
+      {
+        "from": "N164",
+        "to": "N165",
+        "type": "next"
+      },
+      {
+        "from": "N165",
+        "to": "N166",
+        "type": "next"
+      },
+      {
+        "from": "N166",
+        "to": "N167",
+        "type": "next"
+      },
+      {
+        "from": "N167",
+        "to": "N168",
+        "type": "next"
+      },
+      {
+        "from": "N168",
+        "to": "N169",
+        "type": "next"
+      },
+      {
+        "from": "N169",
+        "to": "N170",
+        "type": "next"
+      },
+      {
+        "from": "N170",
+        "to": "N171",
+        "type": "next"
+      },
+      {
+        "from": "N171",
+        "to": "N172",
+        "type": "next"
+      },
+      {
+        "from": "N172",
+        "to": "N173",
+        "type": "next"
+      },
+      {
+        "from": "N173",
+        "to": "N174",
+        "type": "next"
+      }
+    ],
+    "causal": [
+      {
+        "from": "N6",
+        "to": "N7",
+        "type": "internal"
+      },
+      {
+        "from": "N29",
+        "to": "N30",
+        "type": "internal"
+      },
+      {
+        "from": "N42",
+        "to": "N43",
+        "type": "internal"
+      },
+      {
+        "from": "N55",
+        "to": "N56",
+        "type": "internal"
+      },
+      {
+        "from": "N61",
+        "to": "N62",
+        "type": "internal"
+      },
+      {
+        "from": "N114",
+        "to": "N115",
+        "type": "internal"
+      },
+      {
+        "from": "N115",
+        "to": "N116",
+        "type": "internal"
+      },
+      {
+        "from": "N116",
+        "to": "N117",
+        "type": "internal"
+      },
+      {
+        "from": "N119",
+        "to": "N120",
+        "type": "internal"
+      },
+      {
+        "from": "N122",
+        "to": "N123",
+        "type": "internal"
+      },
+      {
+        "from": "N132",
+        "to": "N133",
+        "type": "internal"
+      },
+      {
+        "from": "N133",
+        "to": "N134",
+        "type": "internal"
+      },
+      {
+        "from": "N134",
+        "to": "N135",
+        "type": "internal"
+      },
+      {
+        "from": "N137",
+        "to": "N138",
+        "type": "internal"
+      },
+      {
+        "from": "N140",
+        "to": "N141",
+        "type": "internal"
+      },
+      {
+        "from": "N141",
+        "to": "N142",
+        "type": "internal"
+      }
+    ],
+    "constraints": [
+      {
+        "node": "N2",
+        "constrained_by": "N2",
+        "keywords": [
+          "必须"
+        ],
+        "text": "description: \"ALWAYS USE WHEN: 任何时候当智能体检测到会话卡顿、Token 数量过高、用户提到 '会话太长了'、'重新整理记忆'、'上下文满了'、'开始崩溃'，或者智能体自身检测到多轮迭代中出现记忆混乱、重复犯同类错误时，必须调用本技能生成紧凑的上下文压缩树。\""
+      },
+      {
+        "node": "N10",
+        "constrained_by": "N15",
+        "keywords": [
+          "必须"
+        ],
+        "text": "| **skill_level** | high | Skill 级规则，执行依据 | 必须先 ReadFile |"
+      },
+      {
+        "node": "N35",
+        "constrained_by": "N43",
+        "keywords": [
+          "必须",
+          "禁止"
+        ],
+        "text": "> - **约束规则：** 必须保留意图与变更记录；禁止保留过程性噪音"
+      },
+      {
+        "node": "N52",
+        "constrained_by": "N56",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "> - **约束规则：** 只过滤明确指定的噪音；禁止修改原始文件"
+      },
+      {
+        "node": "N58",
+        "constrained_by": "N59",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "**禁止**将所有内容都压缩成摘要。只提取："
+      },
+      {
+        "node": "N58",
+        "constrained_by": "N60",
+        "keywords": [
+          "不要"
+        ],
+        "text": "当前任务意图（不要过程）"
+      },
+      {
+        "node": "N58",
+        "constrained_by": "N61",
+        "keywords": [
+          "不要"
+        ],
+        "text": "关键变更（不要逐行 diff）"
+      },
+      {
+        "node": "N58",
+        "constrained_by": "N62",
+        "keywords": [
+          "不要"
+        ],
+        "text": "最新状态（不要历史记录）"
+      },
+      {
+        "node": "N63",
+        "constrained_by": "N64",
+        "keywords": [
+          "必须"
+        ],
+        "text": "**必须**让新智能体拿到快照后能："
+      },
+      {
+        "node": "N68",
+        "constrained_by": "N69",
+        "keywords": [
+          "不要"
+        ],
+        "text": "只过滤**噪音文件**（缓存、临时文件、系统文件）。**不要**删除或忽略："
+      },
+      {
+        "node": "N73",
+        "constrained_by": "N77",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "> - **约束规则：** 评估通过才执行；禁止在评估不通过时强制执行"
+      },
+      {
+        "node": "N92",
+        "constrained_by": "N96",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "> - **约束规则：** 向前兼容；禁止在未验证的情况下覆盖"
+      },
+      {
+        "node": "N118",
+        "constrained_by": "N119",
+        "keywords": [
+          "必须"
+        ],
+        "text": "**必须**先发送元指令再输出核心结论，因为元指令确立了任务优先级"
+      },
+      {
+        "node": "N118",
+        "constrained_by": "N120",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "**禁止**在核心结论中包含过程性对话（对话历史、调试尝试、发散讨论）"
+      },
+      {
+        "node": "N118",
+        "constrained_by": "N121",
+        "keywords": [
+          "严禁",
+          "只能"
+        ],
+        "text": "**只能**将压缩结果写入 `~/proactive-memory/SESSION-STATE.md`，严禁写入其他路径"
+      },
+      {
+        "node": "N118",
+        "constrained_by": "N122",
+        "keywords": [
+          "务必"
+        ],
+        "text": "**务必**保持回复简短，因为压缩本身是一次轻量化状态记录，不是长篇报告"
+      },
+      {
+        "node": "N136",
+        "constrained_by": "N137",
+        "keywords": [
+          "必须"
+        ],
+        "text": "**必须**先 ReadFile 读取 `~/Desktop/banshi2/SKILL.md` 再执行任务，因为文件内容是执行依据"
+      },
+      {
+        "node": "N136",
+        "constrained_by": "N138",
+        "keywords": [
+          "禁止"
+        ],
+        "text": "**禁止**直接注入文件内容到对话中而不经过 ReadFile 流程"
+      },
+      {
+        "node": "N136",
+        "constrained_by": "N139",
+        "keywords": [
+          "严禁",
+          "只能"
+        ],
+        "text": "**只能**将执行结果写入 `~/Desktop/banshi2/output.md`，严禁写入其他路径"
+      },
+      {
+        "node": "N136",
+        "constrained_by": "N140",
+        "keywords": [
+          "务必"
+        ],
+        "text": "**务必**保持回复不超过 50 字，从而避免回复本身消耗过多上下文"
+      },
+      {
+        "node": "N136",
+        "constrained_by": "N141",
+        "keywords": [
+          "严禁"
+        ],
+        "text": "**严禁**跳过元指令发送步骤，因为元指令确立了任务优先级"
+      },
+      {
+        "node": "N142",
+        "constrained_by": "N144",
+        "keywords": [
+          "务必"
+        ],
+        "text": "如果感觉上下文明显变慢，**务必**立即说\"压缩当前会话\""
+      }
+    ]
+  },
+  "fidelity": {
+    "skeleton_preservation_rate": 0.2457,
+    "flow_executability": true,
+    "information_discard_rate": 0.7543
+  }
+}
