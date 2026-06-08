@@ -112,10 +112,19 @@ jobs:
           tree = ET.parse('skill_compressed.xml')
           root = tree.getroot()
           assert root.tag == 'skill', 'root must be <skill>'
-          assert root.find('context_hierarchy') is not None, 'missing hierarchy'
-          assert root.find('constraints') is not None, 'missing constraints'
-          assert root.find('execution_flow') is not None, 'missing execution_flow'
-          print('XML validation: PASS')
+          # 验证分层结构（v2.0）
+          layers = root.findall('layer')
+          assert len(layers) == 2, f'expected 2 layers, got {len(layers)}'
+          # 核心层
+          core = next((l for l in layers if l.get('name') == 'core'), None)
+          assert core is not None, 'missing core layer'
+          assert core.find('context_hierarchy') is not None, 'core missing context_hierarchy'
+          # 任务层
+          task = next((l for l in layers if l.get('name') == 'task'), None)
+          assert task is not None, 'missing task layer'
+          assert task.find('constraints') is not None, 'task missing constraints'
+          assert task.find('execution_flow') is not None, 'task missing execution_flow'
+          print('XML validation: PASS (layered structure: core+task)')
           "
 
       - name: Upload artifacts

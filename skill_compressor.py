@@ -385,8 +385,9 @@ if __name__ == "__main__":
         print(f"错误: 文件不存在 {skill_path}", file=sys.stderr)
         sys.exit(1)
 
+    # 统一走 compress_to_xml → build_layered_skill，与 API 行为一致
+    xml = compress_to_xml(str(skill_path))
     result = generate_skill_tree(str(skill_path))
-    xml = _build_xml_from_result(result)
 
     with open(xml_path, "w", encoding="utf-8") as f:
         f.write(xml)

@@ -1,4 +1,5 @@
 <skill name="context-compressor" type="operation">
+<layer name="core" priority="critical" always_loaded="true">
   <context_hierarchy>
     <system_level priority="critical">
       <rule>元指令优先级 &gt; 历史信息</rule>
@@ -13,7 +14,8 @@
       <content>用户当前输入（参考用）</content>
     </user_level>
   </context_hierarchy>
-
+</layer>
+<layer name="task" priority="high" load_on_demand="true">
   <constraints>
     <rule priority="high" target="N2" type="required" text="description: &quot;ALWAYS USE WHEN: 任何时候当智能体检测到会话卡顿、Token 数量过高、用户提到 '会话太长了'、'重新整理记忆'、'上下文满了'、'开始崩溃'，或者智能体自身检测到多轮迭代中出现记忆混乱、重复犯同类错误时，必须调用本技能生成紧凑的上下文压缩树。&quot;" />
     <rule priority="high" target="N10" type="required" text="| **skill_level** | high | Skill 级规则，执行依据 | 必须先 ReadFile |" />
@@ -38,7 +40,6 @@
     <rule priority="critical" target="N136" type="forbidden" text="**严禁**跳过元指令发送步骤，因为元指令确立了任务优先级" />
     <rule priority="high" target="N142" type="required" text="如果感觉上下文明显变慢，**务必**立即说&quot;压缩当前会话&quot;" />
   </constraints>
-
   <execution_flow mode="sequential">
     <step_1 checkpoint="[1]" id="N47" action="意图与最新变更记录" />
     <step_2 checkpoint="[2]" id="N48" action="过滤规则与噪音说明" />
@@ -82,4 +83,5 @@
     </step_10>
     <step_11 checkpoint="[11]" id="N135" action="回复简短确认：" />
   </execution_flow>
+</layer>
 </skill>
