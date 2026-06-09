@@ -8,19 +8,35 @@
 
 ```
 banshi2/
+├── SKILL.md                    # Skill 定义文档（输入）
+├── README.md                   # 项目说明
+├── skill_tree.json             # 解析树（中间产物）
+├── skill_compressed.xml        # XML 压缩输出（v2.0 嵌套分层结构）
+├── skill_index.md              # 快速索引
+├── chapter_hashes.json         # 增量哈希（缓存）
+├── CONTEXT_SNAPSHOT.md         # 上下文快照
+├── FILE_INVENTORY.md           # 文件清单
+│
 ├── parse_skill.py              # 四步提取管线（规则 A/B/C/D）
-├── skill_compressor.py         # XML 压缩输出
+├── skill_compressor.py         # XML 压缩输出（核心层/任务层）
 ├── compress.py                 # 上下文压缩 + 保真度评估
 ├── verify_completeness.py      # 语义完整性验证
 ├── skill_diff.py               # 版本对比
-├── test_compress.py            # 测试（31 个测试用例）
-├── deploy.py                   # 部署脚本
-├── SKILL.md                    # Skill 定义文档
-├── skill_tree.json             # 解析后的树结构
-├── skill_compressed.xml        # XML 压缩输出
+├── drift_detector.py           # L1/L2 外部漂移检测（v2.0 新增）
+├── layered_skill.py            # 分层 Skill 加载器（v2.0 新增）
+├── state_loader.py             # 按需状态加载器（v2.0 新增）
+├── deploy.py                   # 一键部署脚本
+├── test_compress.py            # 测试（47 个测试用例）
+│
+├── prompts/                    # 执行模板
+│   └── skill_executor.md
+│
 ├── Makefile                    # 构建脚本
-├── .github/workflows/          # CI/CD 工作流
-└── .pre-commit-config.yaml     # pre-commit 钩子
+├── .coveragerc                 # 覆盖率配置
+├── .pre-commit-config.yaml     # pre-commit 钩子
+└── .github/workflows/          # CI/CD 工作流
+    ├── ci.yml
+    └── cd.yml
 ```
 
 ## 快速开始
@@ -40,7 +56,7 @@ make skill         # 生成 skill_tree.json + skill_compressed.xml
 ### 运行测试
 
 ```bash
-make test          # 31 passed
+make test          # 47 passed
 ```
 
 ### 代码质量
@@ -64,7 +80,7 @@ python3 deploy.py
 3. ✅ Lint 检查
 4. ✅ Format 检查（自动修复）
 5. ✅ Type Check
-6. ✅ 测试（31 个用例）
+6. ✅ 测试（47 个用例）
 7. ✅ 生成 Skill 工件
 8. ✅ XML 结构验证
 9. ✅ 打包发布文件
@@ -75,7 +91,7 @@ python3 deploy.py
 
 触发条件：push / pull_request 到 main/master
 
-**4 个独立 Job：**
+**5 个独立 Job：**
 
 | Job | 内容 | 严格度 |
 |-----|------|--------|
@@ -117,37 +133,59 @@ git push origin v2.1.0
 
 ## XML 结构
 
-生成的 `skill_compressed.xml` 包含三层设计：
+生成的 `skill_compressed.xml` 采用 **v2.0 嵌套分层结构**（核心层 + 任务层）：
 
 ```xml
 <skill name="context-compressor" type="operation">
-  <context_hierarchy>           <!-- 1. 层级隔离 -->
-    <system_level priority="critical">...</system_level>
-    <skill_level priority="high">...</skill_level>
-    <user_level priority="low">...</user_level>
-  </context_hierarchy>
+  <layer name="core" priority="critical" always_loaded="true">    <!-- 核心层（始终在场） -->
+    <context_hierarchy>           <!-- 1. 层级隔离 -->
+      <system_level priority="critical">...</system_level>
+      <skill_level priority="high">...</skill_level>
+      <user_level priority="low">...</user_level>
+    </context_hierarchy>
+  </layer>
 
-  <constraints>                 <!-- 2. 约束（先件） -->
-    <rule priority="critical" type="forbidden" />
-    <rule priority="high" type="required" />
-  </constraints>
+  <layer name="task" priority="high" load_on_demand="true">      <!-- 任务层（按需加载） -->
+    <constraints>                 <!-- 2. 约束（先件） -->
+      <rule priority="critical" type="forbidden" />
+      <rule priority="high" type="required" />
+    </constraints>
 
-  <execution_flow mode="sequential">  <!-- 3. 执行（顺序） -->
-    <step_4 checkpoint="[4]">
-      <intent>重置上下文优先级</intent>
-      <action>发送元指令...</action>
-      <effect>重置上下文优先级</effect>
-    </step_4>
-  </execution_flow>
+    <execution_flow mode="sequential">  <!-- 3. 执行（顺序） -->
+      <step_4 checkpoint="[4]">
+        <intent>重置上下文优先级</intent>
+        <action>发送元指令...</action>
+        <effect>重置上下文优先级</effect>
+      </step_4>
+    </execution_flow>
+  </layer>
 </skill>
 ```
 
 | 结构 | 设计原则 | 作用 |
 |------|----------|------|
-| `<context_hierarchy>` | 层级隔离 | 防错 |
+| `<layer name="core">` | 始终在场 | 注入元指令 + 层级隔离 |
+| `<layer name="task">` | 按需加载 | 注入约束 + 执行流 |
+| `<context_hierarchy>` 在 core 层 | 层级隔离 | 防错 |
 | `<constraints>` 在 `<execution_flow>` 之前 | 先件后动 | 顺序 |
 | `<step_n checkpoint="[n]">` | 检查点机制 | 验证 |
 | `<intent> + <action> + <effect>` | 意图传递链 | 因果 |
+
+### 分层加载示例
+
+```python
+from layered_skill import LayeredSkill
+from state_loader import StateLoader
+
+ls = LayeredSkill("SKILL.md")
+core = ls.load_core()   # ~700 token，始终在场
+task = ls.load_task()   # ~2k token，按需加载
+all_xml = ls.load_all() # ~2.7k token，完整（向后兼容）
+
+s = StateLoader()
+if s.should_load(user_input):  # 用户说"继续上次"才加载
+    state = s.load()
+```
 
 ## 不做的事（明确范围）
 
