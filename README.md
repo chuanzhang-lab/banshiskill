@@ -6,13 +6,27 @@
 
 ## 🚀 一键启动
 
-无需关心当前目录：
+无需关心当前目录。从仓库根目录或 `~` 直接跑都行。
+
+### 🅱️ 方案一：完整 Clone（推荐，留项目文件）
 
 ```bash
-bash setup.sh
+git clone https://github.com/chuanzhang-lab/banshiskill.git && cd banshiskill && bash setup.sh
 ```
 
-**自动完成**：
+**效果**：完整克隆到本地，可继续开发使用。
+
+### 🅲️ 方案二：一行 Curl（不 clone，只跑测试）
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/chuanzhang-lab/banshiskill/main/setup.sh)
+```
+
+**效果**：不克隆项目，只下载 setup.sh 跑冒烟测试。
+
+> ⚠️ **注意**：如果系统安装了 `safe-rm` 等工具，请勿使用 `curl ... | bash` 方式，改用上面的 `bash <(...)` 写法，避免 stdin 被注入干扰。
+
+**setup.sh 自动完成**：
 1. 切到脚本所在目录（解决"找不到文件"问题）
 2. 安装依赖（`python3 -m pip install -r requirements.txt`）
 3. 生成所有工件（skill_tree.json / skill_compressed.xml / CONTEXT_SNAPSHOT.md）
@@ -20,9 +34,9 @@ bash setup.sh
 5. Lint + Format 检查
 
 **适用场景**：
-- ✅ 第一次使用（推荐）
-- ✅ 验证环境是否配置正确
-- ✅ 跑一次完整冒烟测试
+- ✅ 第一次使用 → 推荐方案一（留项目文件）
+- ✅ 验证环境是否配置正确 → 推荐方案二
+- ✅ 跑一次完整冒烟测试 → 两种都行
 
 ## 项目结构
 
