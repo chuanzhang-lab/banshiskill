@@ -44,27 +44,82 @@ banshi2/
 ### 安装依赖
 
 ```bash
-make install
+make install             # 装 ruff / mypy / pytest / pytest-cov
 ```
 
-### 生成 Skill 工件
+### 生成工件
 
 ```bash
-make skill         # 生成 skill_tree.json + skill_compressed.xml
+make skill               # 生成 skill_tree.json + skill_compressed.xml
+make snapshot            # 生成 CONTEXT_SNAPSHOT.md（含保真度评估）
 ```
 
 ### 运行测试
 
 ```bash
-make test          # 47 passed
+make test                # pytest test_compress.py -v → 47 passed in 0.35s
 ```
 
 ### 代码质量
 
 ```bash
-make lint          # ruff 检查
-make format        # ruff 格式化
+make lint                # ruff check → All checks passed!
+make format              # ruff format → 10 files left unchanged
 ```
+
+### v2.0 新功能（Python API）
+
+```python
+# 分层加载（核心层 + 任务层）
+from layered_skill import LayeredSkill
+ls = LayeredSkill("SKILL.md")
+print(ls.layer_stats())  # {'core': 148, 'task': 1605, 'all': 1769}
+core = ls.load_core()    # ~700 token，始终在场
+task = ls.load_task()    # ~2k token，按需加载
+
+# 按需状态加载（用户说"继续上次"才加载）
+from state_loader import StateLoader
+s = StateLoader()
+if s.should_load(user_input):  # "继续上次" → True
+    state = s.load()
+
+# L1/L2 外部漂移检测
+from drift_detector import DriftDetector
+d = DriftDetector()
+report = d.detect(user_input="不对", output="")
+print(report["drift_detected"])  # True（L1 用户反馈触发）
+```
+
+### 一键部署
+
+```bash
+make ci                  # test + lint（CI 必跑）
+make publish             # 生成工件并列出（不会真推 GitHub）
+python3 deploy.py        # 端到端部署（lint/format/typecheck/test/build 全跑）
+```
+
+### 清理
+
+```bash
+make clean               # 删 __pycache__ / *.pyc / skill_tree.json / skill_compressed.xml
+```
+
+### 完整 make 列表
+
+| Target | 作用 |
+|--------|------|
+| `install` | 装依赖（ruff/mypy/pytest/pytest-cov）|
+| `test` | pytest test_compress.py -v |
+| `lint` | ruff check . --output-format=github |
+| `format` | ruff format . |
+| `skill` | 生成所有 Skill 工件（= skill-tree + skill-xml）|
+| `skill-tree` | 生成 skill_tree.json（parse_skill.py）|
+| `skill-xml` | 生成 skill_compressed.xml（skill_compressor.py）|
+| `snapshot` | 生成 CONTEXT_SNAPSHOT.md（compress.py）|
+| `ci` | test + lint（CI 必跑）|
+| `publish` | 生成工件并列出（**不**真推 GitHub）|
+| `clean` | 删生成文件 + 缓存 |
+| `deploy.py` | **端到端**部署脚本（更严格，含 typecheck）|
 
 ## 生产化部署
 
