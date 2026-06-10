@@ -4,6 +4,26 @@
 
 > **v2.0 已完成 · 船坞出品 · 启航**
 
+## 🚀 一键启动
+
+无需关心当前目录：
+
+```bash
+bash setup.sh
+```
+
+**自动完成**：
+1. 切到脚本所在目录（解决"找不到文件"问题）
+2. 安装依赖（`python3 -m pip install -r requirements.txt`）
+3. 生成所有工件（skill_tree.json / skill_compressed.xml / CONTEXT_SNAPSHOT.md）
+4. 跑测试（47 passed）
+5. Lint + Format 检查
+
+**适用场景**：
+- ✅ 第一次使用（推荐）
+- ✅ 验证环境是否配置正确
+- ✅ 跑一次完整冒烟测试
+
 ## 项目结构
 
 ```
@@ -31,6 +51,8 @@ banshi2/
 ├── prompts/                    # 执行模板
 │   └── skill_executor.md
 │
+├── setup.sh                    # 一键启动脚本（推荐首次使用）
+├── requirements.txt            # 依赖清单
 ├── Makefile                    # 构建脚本
 ├── .coveragerc                 # 覆盖率配置
 ├── .pre-commit-config.yaml     # pre-commit 钩子
