@@ -17,11 +17,11 @@ help:
 	@echo "  publish       - Publish artifacts"
 
 install:
-	pip install --upgrade pip
-	pip install ruff mypy types-python-dateutil pytest pytest-cov
+	python3 -m pip install --upgrade pip
+	python3 -m pip install -r requirements.txt
 
 test:
-	python -m pytest test_compress.py -v --tb=short
+	python3 -m pytest test_compress.py -v --tb=short
 
 lint:
 	ruff check . --output-format=github
@@ -38,7 +38,7 @@ skill-xml:
 	python3 skill_compressor.py
 
 snapshot:
-	python3 compress.py --skill-md ~/Desktop/banshi2/SKILL.md
+	python3 compress.py --skill-md SKILL.md
 
 clean:
 	rm -f skill_tree.json skill_compressed.xml CONTEXT_SNAPSHOT.md
