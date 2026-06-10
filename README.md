@@ -43,14 +43,21 @@ banshi2/
 
 ### 1. 安装依赖
 
+推荐：用 requirements.txt（跨平台、版本固定）
+
 ```bash
-# 推荐：用 requirements.txt（跨平台、版本固定）
 python3 -m pip install -r requirements.txt
+```
 
-# 或者一行命令直接装
+或者一行命令直接装：
+
+```bash
 python3 -m pip install ruff mypy types-python-dateutil pytest pytest-cov
+```
 
-# 也支持 make（如果系统装了 make）
+也支持 make（如果系统装了 make）：
+
+```bash
 make install
 ```
 
@@ -61,53 +68,100 @@ make install
 
 ### 2. 生成工件
 
-```bash
-python3 parse_skill.py           # 生成 skill_tree.json
-python3 skill_compressor.py      # 生成 skill_compressed.xml（v2.0 嵌套分层结构）
-python3 compress.py --skill-md SKILL.md  # 生成 CONTEXT_SNAPSHOT.md
+生成解析树：
 
-# 也支持 make
-make skill                       # = skill-tree + skill-xml
-make snapshot                    # = compress.py
+```bash
+python3 parse_skill.py
+```
+
+生成 XML 压缩文件（v2.0 嵌套分层结构）：
+
+```bash
+python3 skill_compressor.py
+```
+
+生成上下文快照（含保真度评估）：
+
+```bash
+python3 compress.py --skill-md SKILL.md
+```
+
+也支持 make：
+
+```bash
+make skill
+```
+
+```bash
+make snapshot
 ```
 
 ### 3. 运行测试
 
 ```bash
-python3 -m pytest test_compress.py -v   # → 47 passed in 0.35s
+python3 -m pytest test_compress.py -v
+```
 
-# 也支持 make
+预期输出：47 passed in 0.32s
+
+也支持 make：
+
+```bash
 make test
 ```
 
 ### 4. 代码质量
 
-```bash
-python3 -m ruff check .                 # → All checks passed!
-python3 -m ruff format .                # → 10 files left unchanged
+Lint 检查：
 
-# 也支持 make
+```bash
+python3 -m ruff check .
+```
+
+预期输出：All checks passed!
+
+格式化代码：
+
+```bash
+python3 -m ruff format .
+```
+
+预期输出：10 files left unchanged
+
+也支持 make：
+
+```bash
 make lint
+```
+
+```bash
 make format
 ```
 
 ### 5. v2.0 新功能（Python API）
 
+分层加载（核心层 + 任务层）：
+
 ```python
-# 分层加载（核心层 + 任务层）
 from layered_skill import LayeredSkill
 ls = LayeredSkill("SKILL.md")
 print(ls.layer_stats())  # {'core': 148, 'task': 1605, 'all': 1769}
 core = ls.load_core()    # ~700 token，始终在场
 task = ls.load_task()    # ~2k token，按需加载
+```
 
-# 按需状态加载（用户说"继续上次"才加载）
+按需状态加载（用户说"继续上次"才加载）：
+
+```python
 from state_loader import StateLoader
 s = StateLoader()
 if s.should_load(user_input):  # "继续上次" → True
     state = s.load()
+```
 
-# L1/L2 外部漂移检测
+L1/L2 外部漂移检测：
+
+```python
 from drift_detector import DriftDetector
 d = DriftDetector()
 report = d.detect(user_input="不对", output="")
@@ -116,15 +170,22 @@ print(report["drift_detected"])  # True（L1 用户反馈触发）
 
 ### 6. 一键部署
 
+端到端部署（lint/format/typecheck/test/build 全跑）：
+
 ```bash
-python3 deploy.py             # 端到端：lint/format/typecheck/test/build 全跑
-make ci                       # 简化版：test + lint
+python3 deploy.py
+```
+
+简化版（test + lint）：
+
+```bash
+make ci
 ```
 
 ### 7. 清理
 
 ```bash
-make clean                    # 删 __pycache__ / *.pyc / skill_tree.json / skill_compressed.xml
+make clean
 ```
 
 ### 完整命令对照表
