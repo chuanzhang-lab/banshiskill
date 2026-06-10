@@ -41,33 +41,57 @@ banshi2/
 
 ## 快速开始
 
-### 安装依赖
+### 1. 安装依赖
 
 ```bash
-make install             # 装 ruff / mypy / pytest / pytest-cov
+# 推荐：用 requirements.txt（跨平台、版本固定）
+python3 -m pip install -r requirements.txt
+
+# 或者一行命令直接装
+python3 -m pip install ruff mypy types-python-dateutil pytest pytest-cov
+
+# 也支持 make（如果系统装了 make）
+make install
 ```
 
-### 生成工件
+**为什么用 `python3 -m pip` 而不是 `pip`？**
+- `pip` 在 macOS 上可能指向 pip2（系统 Python）
+- `python3 -m pip` 强制用当前 python3 的 pip
+- 跨平台（macOS/Linux/Windows）通用
+
+### 2. 生成工件
 
 ```bash
-make skill               # 生成 skill_tree.json + skill_compressed.xml
-make snapshot            # 生成 CONTEXT_SNAPSHOT.md（含保真度评估）
+python3 parse_skill.py           # 生成 skill_tree.json
+python3 skill_compressor.py      # 生成 skill_compressed.xml（v2.0 嵌套分层结构）
+python3 compress.py --skill-md SKILL.md  # 生成 CONTEXT_SNAPSHOT.md
+
+# 也支持 make
+make skill                       # = skill-tree + skill-xml
+make snapshot                    # = compress.py
 ```
 
-### 运行测试
+### 3. 运行测试
 
 ```bash
-make test                # pytest test_compress.py -v → 47 passed in 0.35s
+python3 -m pytest test_compress.py -v   # → 47 passed in 0.35s
+
+# 也支持 make
+make test
 ```
 
-### 代码质量
+### 4. 代码质量
 
 ```bash
-make lint                # ruff check → All checks passed!
-make format              # ruff format → 10 files left unchanged
+python3 -m ruff check .                 # → All checks passed!
+python3 -m ruff format .                # → 10 files left unchanged
+
+# 也支持 make
+make lint
+make format
 ```
 
-### v2.0 新功能（Python API）
+### 5. v2.0 新功能（Python API）
 
 ```python
 # 分层加载（核心层 + 任务层）
@@ -90,36 +114,32 @@ report = d.detect(user_input="不对", output="")
 print(report["drift_detected"])  # True（L1 用户反馈触发）
 ```
 
-### 一键部署
+### 6. 一键部署
 
 ```bash
-make ci                  # test + lint（CI 必跑）
-make publish             # 生成工件并列出（不会真推 GitHub）
-python3 deploy.py        # 端到端部署（lint/format/typecheck/test/build 全跑）
+python3 deploy.py             # 端到端：lint/format/typecheck/test/build 全跑
+make ci                       # 简化版：test + lint
 ```
 
-### 清理
+### 7. 清理
 
 ```bash
-make clean               # 删 __pycache__ / *.pyc / skill_tree.json / skill_compressed.xml
+make clean                    # 删 __pycache__ / *.pyc / skill_tree.json / skill_compressed.xml
 ```
 
-### 完整 make 列表
+### 完整命令对照表
 
-| Target | 作用 |
-|--------|------|
-| `install` | 装依赖（ruff/mypy/pytest/pytest-cov）|
-| `test` | pytest test_compress.py -v |
-| `lint` | ruff check . --output-format=github |
-| `format` | ruff format . |
-| `skill` | 生成所有 Skill 工件（= skill-tree + skill-xml）|
-| `skill-tree` | 生成 skill_tree.json（parse_skill.py）|
-| `skill-xml` | 生成 skill_compressed.xml（skill_compressor.py）|
-| `snapshot` | 生成 CONTEXT_SNAPSHOT.md（compress.py）|
-| `ci` | test + lint（CI 必跑）|
-| `publish` | 生成工件并列出（**不**真推 GitHub）|
-| `clean` | 删生成文件 + 缓存 |
-| `deploy.py` | **端到端**部署脚本（更严格，含 typecheck）|
+| 任务 | Python 直接调用 | Make 封装 |
+|------|-----------------|-----------|
+| 安装依赖 | `python3 -m pip install -r requirements.txt` | `make install` |
+| 生成 skill_tree.json | `python3 parse_skill.py` | `make skill-tree` |
+| 生成 skill_compressed.xml | `python3 skill_compressor.py` | `make skill-xml` |
+| 生成 CONTEXT_SNAPSHOT.md | `python3 compress.py --skill-md SKILL.md` | `make snapshot` |
+| 运行测试 | `python3 -m pytest test_compress.py -v` | `make test` |
+| Lint | `python3 -m ruff check .` | `make lint` |
+| 格式化 | `python3 -m ruff format .` | `make format` |
+| 端到端部署 | `python3 deploy.py` | - |
+| 清理 | - | `make clean` |
 
 ## 生产化部署
 
